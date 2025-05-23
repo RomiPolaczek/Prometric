@@ -1,44 +1,74 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict
-import re
+import requests
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+import json
+from datetime import datetime
+from pathlib import Path
 
-app = FastAPI(title="Prometheus Retention API")
+app = FastAPI()
 
-# In-memory store for retention policies
-retention_policies: Dict[str, str] = {}
+PROMETHEUS_URL = "http://localhost:9090"
 
-# Regex to validate retention time format like '7d', '12h', '30m'
-VALID_DURATION_REGEX = re.compile(r"^\d+[smhdw]$")
-
-# Request model
-class RetentionPolicy(BaseModel):
-    metric: str
-    retention: str  # e.g., "7d", "12h", "30m"
-
-@app.get("/")
-def read_root():
-    return {"message": "Prometheus Retention API is up and running"}
-
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
-
-@app.get("/retention-policy")
-def list_policies():
-    return retention_policies
-
-@app.post("/retention-policy")
-def add_or_update_policy(policy: RetentionPolicy):
-    if not VALID_DURATION_REGEX.match(policy.retention):
-        raise HTTPException(status_code=400, detail="Invalid retention format. Use formats like '7d', '12h', '30m'")
+@app.get("/metrics")
+def get_all_metrics():
+    try:
+        response = requests.get(f"{PROMETHEUS_URL}/api/v1/label/__name__/values")
+        response.raise_for_status()
+        return {"metrics": response.json()["data"]}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
     
-    retention_policies[policy.metric] = policy.retention
-    return {"message": f"Policy for '{policy.metric}' set to {policy.retention}"}
 
-@app.delete("/retention-policy/{metric}")
-def delete_policy(metric: str):
-    if metric not in retention_policies:
-        raise HTTPException(status_code=404, detail="Policy not found")
-    del retention_policies[metric]
-    return {"message": f"Policy for '{metric}' removed"}
+
+@app.get("/save-metrics")
+def save_metric_data():
+    try:
+        # First get all metric names
+        response = requests.get(f"{PROMETHEUS_URL}/api/v1/label/__name__/values")
+        response.raise_for_status()
+        metric_names = response.json()["data"]
+        
+        # Create a dictionary to store all metrics data
+        all_metrics_data = {}
+        
+        # Get data for each metric
+        for metric_name in metric_names:
+            response = requests.get(f"{PROMETHEUS_URL}/api/v1/query", params={"query": metric_name})
+            response.raise_for_status()
+            all_metrics_data[metric_name] = response.json()
+
+        # Save all data to a single file
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        path = Path(f"all_metrics_{timestamp}.json")
+        with open(path, "w") as f:
+            json.dump(all_metrics_data, f, indent=2)
+
+        return {"message": f"Saved all metrics data to {path}"}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+@app.delete("/delete-series/{metric_name}")
+def delete_metric_series(metric_name: str):
+    try:
+        # restrict deletion to a job, like blackbox_mama_mta
+        match = f'{metric_name}{{job="blackbox_mama_mta"}}'
+        delete_resp = requests.post(
+            f"{PROMETHEUS_URL}/api/v1/admin/tsdb/delete_series",
+            params={"match[]": match}
+        )
+        delete_resp.raise_for_status()
+        return {"message": f"Deleted series: {match}"}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+@app.post("/cleanup")
+def clean_tombstones():
+    try:
+        clean_resp = requests.post(f"{PROMETHEUS_URL}/api/v1/admin/tsdb/clean_tombstones")
+        clean_resp.raise_for_status()
+        return {"message": "Tombstones cleaned up successfully"}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
