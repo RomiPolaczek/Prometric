@@ -1,3 +1,7 @@
 uvicorn  #serves FastAPI app so clients or tools can interact with your API.
 fastapi
 requests
+sqlalchemy
+aiohttp
+apscheduler
+pydantic

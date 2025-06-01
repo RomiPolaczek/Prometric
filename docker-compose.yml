@@ -1,0 +1,46 @@
+services:
+  prometheus-retention-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PROMETHEUS_URL=http://prometheus:9090
+      - DATABASE_URL=sqlite:///./data/prometheus_retention.db
+      - RETENTION_CHECK_INTERVAL_HOURS=6
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=90d'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'  # Required for deletion API
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+
+  blackbox:
+    image: prom/blackbox-exporter:latest
+    ports:
+      - "9115:9115"
+    volumes:
+      - ./blackbox.yml:/config/blackbox.yml
+    command:
+      - '--config.file=/config/blackbox.yml'
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
