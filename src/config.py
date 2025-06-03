@@ -20,7 +20,7 @@ class Config:
     
     # Logging
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
-    LOG_FILE: str = os.getenv("LOG_FILE", "/app/logs/app.log")
+    LOG_FILE: str = os.getenv("LOG_FILE", "/app/logs/app.json")
     
     @classmethod
     def get_prometheus_url(cls) -> str:

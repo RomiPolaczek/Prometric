@@ -5,3 +5,4 @@ sqlalchemy
 aiohttp
 apscheduler
 pydantic
+pytz  # For timezone support

@@ -156,7 +156,7 @@ class RetentionService:
                     
                     # Delete data from beginning of time to cutoff timestamp
                     params = {
-                        'match[]': f'{{{metric_name}}}',
+                        'match[]': metric_name,
                         'start': '0',
                         'end': str(cutoff_timestamp)
                     }

@@ -31,6 +31,11 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   blackbox:
     image: prom/blackbox-exporter:latest
@@ -41,6 +46,13 @@ services:
     command:
       - '--config.file=/config/blackbox.yml'
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        mode: "non-blocking"
+        tag: "{{.Name}}"
 
 volumes:
   prometheus_data:
