@@ -52,7 +52,7 @@ def start_scheduler(retention_service: RetentionService):
         return
     
     # Get schedule interval from environment variable (default: 6 hours)
-    interval_hours = int(os.getenv("RETENTION_CHECK_INTERVAL_HOURS", "6"))
+    interval_hours = float(os.getenv("RETENTION_CHECK_INTERVAL_HOURS", "6"))
     
     scheduler = AsyncIOScheduler()
     

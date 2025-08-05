@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Text
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Text, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
@@ -21,7 +21,7 @@ class RetentionPolicy(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     metric_name_pattern = Column(String(255), nullable=False, index=True)
-    retention_days = Column(Integer, nullable=False)
+    retention_days = Column(Float, nullable=False) 
     description = Column(Text, nullable=True)
     enabled = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

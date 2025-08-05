@@ -9,11 +9,11 @@ class RetentionPolicyBase(BaseModel):
         description="Metric name pattern (supports regex)",
         example="cpu_usage_*"
     )
-    retention_days: int = Field(
+    retention_days: float = Field(
         ..., 
         gt=0, 
-        description="Number of days to retain the metric data",
-        example=30
+        description="Number of days to retain the metric data (supports fractional days)",
+        example=30.0
     )
     description: Optional[str] = Field(
         None, 
@@ -47,8 +47,8 @@ class RetentionPolicyBase(BaseModel):
 
     @validator('retention_days')
     def validate_retention_days(cls, v):
-        if v < 1:
-            raise ValueError('Retention days must be at least 1')
+        if v < 0.0007:  # Minimum 1 minute (1/1440 days)
+            raise ValueError('Retention days must be at least 0.0007 (1 minute)')
         if v > 3650:  # ~10 years max
             raise ValueError('Retention days cannot exceed 3650 (10 years)')
         return v
@@ -58,7 +58,7 @@ class RetentionPolicyCreate(RetentionPolicyBase):
 
 class RetentionPolicyUpdate(BaseModel):
     metric_name_pattern: Optional[str] = Field(None, description="Metric name pattern")
-    retention_days: Optional[int] = Field(None, gt=0, description="Number of days to retain")
+    retention_days: Optional[float] = Field(None, gt=0, description="Number of days to retain (supports fractional days)")
     description: Optional[str] = Field(None, description="Policy description")
     enabled: Optional[bool] = Field(None, description="Whether the policy is enabled")
 
@@ -83,8 +83,8 @@ class RetentionPolicyUpdate(BaseModel):
     @validator('retention_days')
     def validate_retention_days(cls, v):
         if v is not None:
-            if v < 1:
-                raise ValueError('Retention days must be at least 1')
+            if v < 0.0007:  # Minimum 1 minute (1/1440 days)
+                raise ValueError('Retention days must be at least 0.0007 (1 minute)')
             if v > 3650:
                 raise ValueError('Retention days cannot exceed 3650 (10 years)')
         return v
@@ -116,3 +116,17 @@ class ExecutionSummary(BaseModel):
     failed_executions: int
     total_series_deleted: int
     execution_time: datetime
+
+# Helper constants for common time conversions
+TIME_CONVERSIONS = {
+    "1_minute": 1/1440,      # 0.0007 days
+    "5_minutes": 5/1440,     # 0.0035 days  
+    "10_minutes": 10/1440,   # 0.0069 days
+    "30_minutes": 30/1440,   # 0.0208 days
+    "1_hour": 1/24,          # 0.0417 days
+    "6_hours": 6/24,         # 0.25 days
+    "12_hours": 12/24,       # 0.5 days
+    "1_day": 1,
+    "1_week": 7,
+    "1_month": 30
+}
