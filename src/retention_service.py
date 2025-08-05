@@ -154,27 +154,60 @@ class RetentionService:
                     # Create deletion request for each metric
                     delete_url = f"{self.prometheus_url}/api/v1/admin/tsdb/delete_series"
                     
-                    # Delete data from beginning of time to cutoff timestamp
-                    params = {
-                        'match[]': metric_name,
-                        'start': '0',
-                        'end': str(cutoff_timestamp)
-                    }
+                    # FIXED: Use form data instead of URL parameters
+                    data = aiohttp.FormData()
+                    data.add_field('match[]', f'{{__name__="{metric_name}"}}')
+                    data.add_field('start', '0')
+                    data.add_field('end', str(cutoff_timestamp))
                     
-                    async with session.post(delete_url, params=params) as response:
+                    logger.debug(f"Using match selector: {{__name__=\"{metric_name}\"}}")
+                    
+                    async with session.post(delete_url, data=data) as response:
+                        response_text = await response.text()
+                        
                         if response.status == 204:  # Success (No Content)
                             total_deleted += 1
-                            logger.info(f"Deleted old data for metric: {metric_name}")
+                            logger.info(f"Successfully deleted old data for metric: {metric_name}")
                         elif response.status == 400:
-                            logger.warning(f"Bad request for metric {metric_name}: {await response.text()}")
+                            try:
+                                response_json = await response.json()
+                                logger.warning(f"Bad request for metric {metric_name}: {response_json}")
+                            except:
+                                logger.warning(f"Bad request for metric {metric_name}: {response_text}")
                         else:
-                            logger.error(f"Failed to delete data for metric {metric_name}: HTTP {response.status}")
+                            logger.error(f"Failed to delete data for metric {metric_name}: HTTP {response.status} - {response_text}")
+                    
+                    # Small delay between requests to avoid overwhelming Prometheus
+                    await asyncio.sleep(0.1)
 
         except Exception as e:
             logger.error(f"Error during metric data deletion: {e}")
             raise
 
         return total_deleted
+
+    async def _validate_metric_selector(self, metric_name: str) -> bool:
+        """Validate that the metric selector is properly formatted"""
+        try:
+            # Test query to validate the selector format
+            selector = f'{{__name__="{metric_name}"}}'
+            query_url = f"{self.prometheus_url}/api/v1/query"
+            
+            async with aiohttp.ClientSession(timeout=self.timeout) as session:
+                params = {
+                    'query': f'count({selector})',
+                    'time': str(int(datetime.utcnow().timestamp()))
+                }
+                
+                async with session.get(query_url, params=params) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        return data.get('status') == 'success'
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"Error validating metric selector for {metric_name}: {e}")
+            return False
 
     async def execute_policy(self, db: Session, policy_id: int) -> ExecutionResult:
         """Execute a specific retention policy"""
@@ -193,9 +226,13 @@ class RetentionService:
             cutoff_timestamp = int(cutoff_date.timestamp() * 1000)
             
             logger.info(f"Executing policy {policy_id}: {policy.metric_name_pattern} (retention: {policy.retention_days} days)")
+            logger.info(f"Cutoff date: {cutoff_date.isoformat()}, Cutoff timestamp: {cutoff_timestamp}")
             
             # Find matching metrics
             matching_metrics = await self._query_prometheus_metrics(policy.metric_name_pattern)
+            
+            if not matching_metrics:
+                logger.warning(f"No metrics found matching pattern: {policy.metric_name_pattern}")
             
             # Delete old data
             series_deleted = await self._delete_metric_data(matching_metrics, cutoff_timestamp)
@@ -225,7 +262,7 @@ class RetentionService:
                 success=True
             )
             
-            logger.info(f"Policy {policy_id} executed successfully: {series_deleted} series deleted")
+            logger.info(f"Policy {policy_id} executed successfully: {series_deleted} series deleted from {len(matching_metrics)} metrics")
             return result
             
         except Exception as e:
@@ -265,9 +302,50 @@ class RetentionService:
             try:
                 result = await self.execute_policy(db, policy.id)
                 results.append(result)
+                
+                # Small delay between policy executions to avoid overwhelming Prometheus
+                await asyncio.sleep(1)
+                
             except Exception as e:
                 logger.error(f"Failed to execute policy {policy.id}: {e}")
                 # Continue with other policies
                 continue
         
+        logger.info(f"Completed execution of {len(results)} policies")
         return results
+
+    async def get_execution_logs(self, db: Session, policy_id: Optional[int] = None, limit: int = 100) -> List[ExecutionLog]:
+        """Get execution logs, optionally filtered by policy ID"""
+        query = db.query(ExecutionLog)
+        
+        if policy_id:
+            query = query.filter(ExecutionLog.policy_id == policy_id)
+        
+        return query.order_by(ExecutionLog.execution_time.desc()).limit(limit).all()
+
+    async def test_policy_dry_run(self, db: Session, policy_id: int) -> Dict[str, Any]:
+        """Test a policy without actually deleting data (dry run)"""
+        policy = self.get_policy(db, policy_id)
+        if not policy:
+            raise ValueError(f"Policy with ID {policy_id} not found")
+
+        try:
+            # Find matching metrics
+            matching_metrics = await self._query_prometheus_metrics(policy.metric_name_pattern)
+            
+            # Calculate what would be deleted
+            cutoff_date = datetime.utcnow() - timedelta(days=policy.retention_days)
+            
+            return {
+                "policy_id": policy.id,
+                "metric_pattern": policy.metric_name_pattern,
+                "retention_days": policy.retention_days,
+                "cutoff_date": cutoff_date.isoformat(),
+                "matching_metrics": matching_metrics,
+                "metrics_count": len(matching_metrics),
+                "would_delete_data_older_than": cutoff_date.isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Error during dry run for policy {policy_id}: {e}")
+            raise

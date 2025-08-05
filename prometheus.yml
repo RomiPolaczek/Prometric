@@ -11,12 +11,6 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'retention-api'
-    static_configs:
-      - targets: ['prometheus-retention-api:8000']
-    metrics_path: '/health'
-    scrape_interval: 30s
-
   - job_name: 'blackbox_mama_mta'
     metrics_path: /probe
     params:
@@ -36,3 +30,9 @@ scrape_configs:
 # - job_name: 'my-app'
 #   static_configs:
 #     - targets: ['my-app:8080']
+
+#  - job_name: 'retention-api'
+#    static_configs:
+#      - targets: ['prometheus-retention-api:8000']
+#    metrics_path: '/health'
+#    scrape_interval: 30s
