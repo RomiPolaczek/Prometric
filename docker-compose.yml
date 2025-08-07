@@ -6,7 +6,7 @@ services:
     environment:
       - PROMETHEUS_URL=http://prometheus:9090
       - DATABASE_URL=sqlite:///./data/prometheus_retention.db
-      - RETENTION_CHECK_INTERVAL_HOURS=0.0017
+      - RETENTION_CHECK_INTERVAL_HOURS=0.0883
       - TZ=Asia/Jerusalem
       # - LOG_LEVEL=INFO
     volumes:

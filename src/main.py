@@ -1,7 +1,10 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from typing import List
 import uvicorn
+import os
 
 from database import get_db, engine
 from models import RetentionPolicyCreate, RetentionPolicyResponse, RetentionPolicyUpdate
@@ -22,6 +25,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Mount static files (CSS, JS, images)
+if os.path.exists("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+
 retention_service = RetentionService()
 
 @app.on_event("startup")
@@ -31,9 +38,47 @@ async def startup_event():
     start_scheduler(retention_service)
     logger.info("Background scheduler started successfully")
 
-@app.get("/")
-async def root():
-    return {"message": "Prometheus Retention Manager API"}
+@app.get("/", response_class=HTMLResponse)
+async def serve_ui():
+    """Serve the web UI"""
+    try:
+        with open("index.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(content="""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Prometheus Retention Manager</title>
+            <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
+                .container { max-width: 600px; margin: 0 auto; }
+                .api-link { background: #3b82f6; color: white; padding: 1rem 2rem; 
+                           text-decoration: none; border-radius: 0.5rem; display: inline-block; margin: 0.5rem; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🗄️ Prometheus Retention Manager</h1>
+                <p>API for managing custom retention policies for Prometheus metrics</p>
+                
+                <h2>Available Endpoints:</h2>
+                <div>
+                    <a href="/docs" class="api-link">📖 API Documentation</a>
+                    <a href="/health" class="api-link">❤️ Health Check</a>
+                    <a href="/retention-policies" class="api-link">📋 View Policies (JSON)</a>
+                </div>
+                
+                <h3>Quick Start:</h3>
+                <p>1. Create retention policies using the API</p>
+                <p>2. Policies will execute automatically based on the configured schedule</p>
+                <p>3. Monitor execution via the health endpoint</p>
+                
+                <p><small>To use the web UI, place the HTML, CSS, and JS files in the application directory.</small></p>
+            </div>
+        </body>
+        </html>
+        """)
 
 @app.post("/retention-policies", response_model=RetentionPolicyResponse)
 async def create_retention_policy(
