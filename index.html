@@ -3,16 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prometheus Retention Manager</title>
+    <title>Prometheus Management Console</title>
     <link rel="stylesheet" href="static/styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <i class="fas fa-database"></i>
-                <span>Prometheus Retention Manager</span>
+                <i class="fas fa-fire"></i>
+                <span>Prometric</span>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="query">
+                    <i class="fas fa-search"></i>
+                    Query
+                </button>
+                <button class="nav-tab" data-tab="graph">
+                    <i class="fas fa-chart-line"></i>
+                    Graph
+                </button>
+                <button class="nav-tab" data-tab="alerts">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Alerts
+                </button>
+                <button class="nav-tab" data-tab="targets">
+                    <i class="fas fa-bullseye"></i>
+                    Targets
+                </button>
+                <button class="nav-tab" data-tab="retention">
+                    <i class="fas fa-database"></i>
+                    Retention
+                </button>
+                <button class="nav-tab" data-tab="config">
+                    <i class="fas fa-cog"></i>
+                    Status
+                </button>
             </div>
             <div class="nav-status" id="navStatus">
                 <span class="status-indicator" id="statusIndicator"></span>
@@ -21,65 +49,268 @@
         </div>
     </nav>
 
-    <div class="container">
-        <!-- Header Section -->
-        <div class="header-section">
-            <h1>
-                <i class="fas fa-clock"></i>
-                Retention Policies Management
-            </h1>
-            <p class="subtitle">Configure custom retention periods for your Prometheus metrics</p>
-        </div>
+    <!-- Main Content Container -->
+    <div class="main-container">
+        <!-- Query Tab -->
+        <div class="tab-content active" id="query-tab">
+            <div class="page-header">
+                <h1><i class="fas fa-search"></i> Query Console</h1>
+                <p>Execute PromQL queries against your Prometheus instance</p>
+            </div>
 
-        <!-- Action Buttons -->
-        <div class="action-bar">
-            <button class="btn btn-primary" onclick="showCreateModal()">
-                <i class="fas fa-plus"></i>
-                Create New Policy
-            </button>
-            <button class="btn btn-secondary" onclick="executeAllPolicies()">
-                <i class="fas fa-play"></i>
-                Execute All Policies
-            </button>
-            <button class="btn btn-info" onclick="refreshPolicies()">
-                <i class="fas fa-refresh"></i>
-                Refresh
-            </button>
-        </div>
+            <div class="query-section">
+                <div class="query-input-container">
+                    <div class="query-input-wrapper">
+                        <textarea id="queryInput" placeholder="Enter your PromQL query here..." rows="3"></textarea>
+                        <div class="query-actions">
+                            <button class="btn btn-primary" onclick="executeQuery()">
+                                <i class="fas fa-play"></i>
+                                Execute
+                            </button>
+                            <button class="btn btn-secondary" onclick="clearQuery()">
+                                <i class="fas fa-eraser"></i>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                    <div class="query-suggestions" id="querySuggestions"></div>
+                </div>
 
-        <!-- Policies Table -->
-        <div class="table-container">
-            <table class="policies-table" id="policiesTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Metric Pattern</th>
-                        <th>Retention</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Last Executed</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="policiesTableBody">
-                    <!-- Policies will be loaded here -->
-                </tbody>
-            </table>
-            <div class="empty-state" id="emptyState" style="display: none;">
-                <i class="fas fa-inbox"></i>
-                <h3>No retention policies found</h3>
-                <p>Create your first retention policy to get started</p>
-                <button class="btn btn-primary" onclick="showCreateModal()">
-                    <i class="fas fa-plus"></i>
-                    Create Policy
-                </button>
+                <div class="query-results" id="queryResults">
+                    <div class="results-tabs">
+                        <button class="results-tab active" data-format="table">
+                            <i class="fas fa-table"></i>
+                            Table
+                        </button>
+                        <button class="results-tab" data-format="json">
+                            <i class="fas fa-code"></i>
+                            JSON
+                        </button>
+                    </div>
+                    <div class="results-content" id="resultsContent">
+                        <div class="empty-results">
+                            <i class="fas fa-search"></i>
+                            <p>Execute a query to see results</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Loading Spinner -->
-        <div class="loading-spinner" id="loadingSpinner" style="display: none;">
-            <div class="spinner"></div>
-            <p>Loading...</p>
+        <!-- Graph Tab -->
+        <div class="tab-content" id="graph-tab">
+            <div class="page-header">
+                <h1><i class="fas fa-chart-line"></i> Graph</h1>
+                <p>Visualize metrics over time</p>
+            </div>
+
+            <div class="graph-controls">
+                <div class="graph-query-section">
+                    <textarea id="graphQuery" placeholder="Enter PromQL query for graphing..." rows="2"></textarea>
+                    <div class="graph-time-controls">
+                        <div class="time-range-picker">
+                            <label>Time Range:</label>
+                            <select id="timeRange">
+                                <option value="1h">Last 1 hour</option>
+                                <option value="6h">Last 6 hours</option>
+                                <option value="12h">Last 12 hours</option>
+                                <option value="1d" selected>Last 1 day</option>
+                                <option value="3d">Last 3 days</option>
+                                <option value="1w">Last 1 week</option>
+                                <option value="1M">Last 1 month</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="custom-time" id="customTimeInputs" style="display: none;">
+                            <input type="datetime-local" id="startTime">
+                            <input type="datetime-local" id="endTime">
+                        </div>
+                        <button class="btn btn-primary" onclick="executeGraph()">
+                            <i class="fas fa-chart-line"></i>
+                            Graph
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="graph-container">
+                <canvas id="metricsChart"></canvas>
+                <div class="graph-empty" id="graphEmpty">
+                    <i class="fas fa-chart-line"></i>
+                    <p>Enter a query and click Graph to visualize metrics</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Tab -->
+        <div class="tab-content" id="alerts-tab">
+            <div class="page-header">
+                <h1><i class="fas fa-exclamation-triangle"></i> Alerts</h1>
+                <p>Monitor active alerts and their status</p>
+            </div>
+
+            <div class="alerts-container">
+                <div class="alerts-summary" id="alertsSummary">
+                    <div class="alert-stat firing">
+                        <div class="stat-number" id="firingAlerts">-</div>
+                        <div class="stat-label">Firing</div>
+                    </div>
+                    <div class="alert-stat pending">
+                        <div class="stat-number" id="pendingAlerts">-</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="alert-stat inactive">
+                        <div class="stat-number" id="inactiveAlerts">-</div>
+                        <div class="stat-label">Inactive</div>
+                    </div>
+                </div>
+
+                <div class="alerts-list" id="alertsList">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Loading alerts...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Targets Tab -->
+        <div class="tab-content" id="targets-tab">
+            <div class="page-header">
+                <h1><i class="fas fa-bullseye"></i> Targets</h1>
+                <p>Monitor scrape targets and their health</p>
+            </div>
+
+            <div class="targets-container">
+                <div class="targets-summary" id="targetsSummary">
+                    <div class="target-stat up">
+                        <div class="stat-number" id="targetsUp">-</div>
+                        <div class="stat-label">Up</div>
+                    </div>
+                    <div class="target-stat down">
+                        <div class="stat-number" id="targetsDown">-</div>
+                        <div class="stat-label">Down</div>
+                    </div>
+                    <div class="target-stat total">
+                        <div class="stat-number" id="targetsTotal">-</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                </div>
+
+                <div class="targets-list" id="targetsList">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Loading targets...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Retention Tab -->
+        <div class="tab-content" id="retention-tab">
+            <div class="page-header">
+                <h1><i class="fas fa-database"></i> Retention Management</h1>
+                <p>Configure custom retention policies for your metrics</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-bar">
+                <button class="btn btn-primary" onclick="showCreateModal()">
+                    <i class="fas fa-plus"></i>
+                    Create New Policy
+                </button>
+                <button class="btn btn-secondary" onclick="executeAllPolicies()">
+                    <i class="fas fa-play"></i>
+                    Execute All Policies
+                </button>
+                <button class="btn btn-info" onclick="refreshPolicies()">
+                    <i class="fas fa-refresh"></i>
+                    Refresh
+                </button>
+            </div>
+
+            <!-- Policies Table -->
+            <div class="table-container">
+                <table class="policies-table" id="policiesTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Metric Pattern</th>
+                            <th>Retention</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Last Executed</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="policiesTableBody">
+                        <!-- Policies will be loaded here -->
+                    </tbody>
+                </table>
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No retention policies found</h3>
+                    <p>Create your first retention policy to get started</p>
+                    <button class="btn btn-primary" onclick="showCreateModal()">
+                        <i class="fas fa-plus"></i>
+                        Create Policy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Config/Status Tab -->
+        <div class="tab-content" id="config-tab">
+            <div class="page-header">
+                <h1><i class="fas fa-cog"></i> System Status</h1>
+                <p>Prometheus configuration and runtime information</p>
+            </div>
+
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <h3><i class="fas fa-info-circle"></i> Build Information</h3>
+                    </div>
+                    <div class="status-card-body" id="buildInfo">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <h3><i class="fas fa-server"></i> Runtime Information</h3>
+                    </div>
+                    <div class="status-card-body" id="runtimeInfo">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <h3><i class="fas fa-flag"></i> Configuration Flags</h3>
+                    </div>
+                    <div class="status-card-body" id="configFlags">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <h3><i class="fas fa-chart-bar"></i> TSDB Stats</h3>
+                    </div>
+                    <div class="status-card-body" id="tsdbStats">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -188,6 +419,14 @@
     <!-- Toast Notifications -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script src="static/app.js"></script>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner large"></div>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <script src="static/prometheus-ui.js"></script>
 </body>
 </html>

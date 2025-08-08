@@ -6,3 +6,6 @@ aiohttp
 apscheduler
 pydantic
 pytz  # For timezone support
+python-multipart
+httpx
+psutil

@@ -1,10 +1,14 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Dict, Any
 import uvicorn
 import os
+import httpx
+import asyncio
+from urllib.parse import urlencode
 
 from database import get_db, engine
 from models import RetentionPolicyCreate, RetentionPolicyResponse, RetentionPolicyUpdate
@@ -20,9 +24,18 @@ logger = setup_logger()
 database.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="Prometheus Retention Manager",
-    description="API for managing custom retention policies for Prometheus metrics",
-    version="1.0.0"
+    title="Prometheus Management Console",
+    description="Unified interface for Prometheus monitoring and retention management",
+    version="2.0.0"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Configure appropriately for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Mount static files (CSS, JS, images)
@@ -34,13 +47,13 @@ retention_service = RetentionService()
 @app.on_event("startup")
 async def startup_event():
     """Start the background scheduler when the app starts"""
-    logger.info("Starting application...")
+    logger.info("Starting Prometheus Management Console...")
     start_scheduler(retention_service)
     logger.info("Background scheduler started successfully")
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_ui():
-    """Serve the web UI"""
+    """Serve the unified web UI"""
     try:
         with open("index.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
@@ -49,37 +62,185 @@ async def serve_ui():
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Prometheus Retention Manager</title>
+            <title>Prometheus Management Console</title>
             <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
+                body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; 
+                       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
                 .container { max-width: 600px; margin: 0 auto; }
-                .api-link { background: #3b82f6; color: white; padding: 1rem 2rem; 
-                           text-decoration: none; border-radius: 0.5rem; display: inline-block; margin: 0.5rem; }
+                .logo { font-size: 4rem; margin-bottom: 1rem; }
+                .api-link { background: rgba(255,255,255,0.2); color: white; padding: 1rem 2rem; 
+                           text-decoration: none; border-radius: 0.5rem; display: inline-block; margin: 0.5rem;
+                           border: 1px solid rgba(255,255,255,0.3); transition: all 0.3s; }
+                .api-link:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
             </style>
         </head>
         <body>
             <div class="container">
-                <h1>🗄️ Prometheus Retention Manager</h1>
-                <p>API for managing custom retention policies for Prometheus metrics</p>
+                <div class="logo">🔥</div>
+                <h1>Prometheus Management Console</h1>
+                <p>Unified interface for Prometheus monitoring and retention management</p>
                 
                 <h2>Available Endpoints:</h2>
                 <div>
                     <a href="/docs" class="api-link">📖 API Documentation</a>
                     <a href="/health" class="api-link">❤️ Health Check</a>
-                    <a href="/retention-policies" class="api-link">📋 View Policies (JSON)</a>
+                    <a href="/retention-policies" class="api-link">📋 Retention Policies</a>
+                    <a href="/debug/metrics-sample" class="api-link">🔍 Debug Metrics</a>
                 </div>
                 
-                <h3>Quick Start:</h3>
-                <p>1. Create retention policies using the API</p>
-                <p>2. Policies will execute automatically based on the configured schedule</p>
-                <p>3. Monitor execution via the health endpoint</p>
-                
-                <p><small>To use the web UI, place the HTML, CSS, and JS files in the application directory.</small></p>
+                <p><small>To use the full web UI, place the HTML, CSS, and JS files in the application directory.</small></p>
             </div>
         </body>
         </html>
         """)
 
+# Debug endpoints for troubleshooting
+@app.get("/debug/metrics-sample")
+async def get_metrics_sample():
+    """Get a sample of available metrics for debugging"""
+    try:
+        metrics = await retention_service.get_available_metrics_sample(100)
+        return {
+            "total_metrics": len(metrics),
+            "sample_metrics": metrics[:20],  # First 20 for display
+            "all_metrics": metrics  # All requested metrics
+        }
+    except Exception as e:
+        logger.error(f"Failed to get metrics sample: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/debug/test-pattern")
+async def test_pattern(request: Dict[str, str]):
+    """Test a metric pattern against available metrics"""
+    pattern = request.get("pattern", "")
+    if not pattern:
+        raise HTTPException(status_code=400, detail="Pattern is required")
+    
+    try:
+        # Get the regex pattern that would be used
+        regex_pattern = retention_service._convert_pattern_to_regex(pattern)
+        
+        # Get matching metrics
+        matching_metrics = await retention_service._query_prometheus_metrics(pattern)
+        
+        # Get sample of all metrics for comparison
+        all_metrics = await retention_service.get_available_metrics_sample(200)
+        
+        return {
+            "input_pattern": pattern,
+            "regex_pattern": regex_pattern,
+            "matches_count": len(matching_metrics),
+            "matching_metrics": matching_metrics[:10],  # First 10 matches
+            "total_available_metrics": len(all_metrics),
+            "sample_available_metrics": all_metrics[:10]  # First 10 available
+        }
+    except Exception as e:
+        logger.error(f"Failed to test pattern '{pattern}': {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/retention-policies/{policy_id}/dry-run")
+async def dry_run_policy(policy_id: int, db: Session = Depends(get_db)):
+    """Test a policy without actually deleting data (dry run)"""
+    try:
+        result = await retention_service.test_policy_dry_run(db, policy_id)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Failed to execute dry run for policy {policy_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+# Prometheus Proxy Endpoints
+@app.get("/api/v1/{path:path}")
+@app.post("/api/v1/{path:path}")
+async def prometheus_proxy(path: str, request: Request):
+    """Proxy requests to Prometheus API to avoid CORS issues"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        # Build the target URL
+        target_url = f"{prometheus_url}/api/v1/{path}"
+        
+        # Get query parameters
+        query_params = dict(request.query_params)
+        if query_params:
+            target_url += f"?{urlencode(query_params)}"
+        
+        # Get request body for POST requests
+        body = None
+        if request.method == "POST":
+            body = await request.body()
+        
+        # Make the request to Prometheus
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.request(
+                method=request.method,
+                url=target_url,
+                headers=dict(request.headers),
+                content=body
+            )
+            
+            # Return the response
+            return JSONResponse(
+                content=response.json() if response.headers.get('content-type', '').startswith('application/json') else response.text,
+                status_code=response.status_code,
+                headers=dict(response.headers)
+            )
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Prometheus request timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Proxy error: {str(e)}")
+
+# Prometheus-specific endpoints for the UI
+@app.post("/prometheus-proxy/query")
+async def prometheus_query(request: Dict[str, Any]):
+    """Execute a PromQL query"""
+    query = request.get("query", "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="Query is required")
+    
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                f"{prometheus_url}/api/v1/query",
+                params={"query": query}
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            return response.json()
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Query timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+
+@app.get("/prometheus-proxy/metrics")
+async def get_prometheus_metrics():
+    """Get list of available metrics from Prometheus"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(f"{prometheus_url}/api/v1/label/__name__/values")
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            return response.json()
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Request timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+
+# Retention Policy Management Endpoints
 @app.post("/retention-policies", response_model=RetentionPolicyResponse)
 async def create_retention_policy(
     policy: RetentionPolicyCreate,
@@ -91,6 +252,7 @@ async def create_retention_policy(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.error(f"Failed to create retention policy: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.get("/retention-policies", response_model=List[RetentionPolicyResponse])
@@ -121,6 +283,7 @@ async def update_retention_policy(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.error(f"Failed to update retention policy {policy_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.delete("/retention-policies/{policy_id}")
@@ -140,6 +303,7 @@ async def execute_retention_policy(policy_id: int, db: Session = Depends(get_db)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.error(f"Failed to execute retention policy {policy_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.post("/execute-all-policies")
@@ -149,23 +313,122 @@ async def execute_all_policies(db: Session = Depends(get_db)):
         results = await retention_service.execute_all_policies(db)
         return {"message": "All policies executed", "results": results}
     except Exception as e:
+        logger.error(f"Failed to execute all policies: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
+# System Health and Status
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     try:
         # Test Prometheus connection
         prometheus_status = await retention_service.check_prometheus_connection()
+        
+        # Get basic system stats
+        try:
+            import psutil
+            system_stats = {
+                "cpu_percent": psutil.cpu_percent(),
+                "memory_percent": psutil.virtual_memory().percent,
+                "disk_percent": psutil.disk_usage('/').percent
+            }
+        except ImportError:
+            system_stats = {"status": "psutil not available"}
+        
         return {
             "status": "healthy",
-            "prometheus_connection": prometheus_status
+            "prometheus_connection": prometheus_status,
+            "system": system_stats,
+            "version": "2.0.0"
         }
     except Exception as e:
+        logger.error(f"Health check failed: {e}")
         return {
             "status": "unhealthy",
+            "error": str(e),
+            "version": "2.0.0"
+        }
+
+@app.get("/system-info")
+async def get_system_info():
+    """Get detailed system information"""
+    try:
+        import psutil
+        import platform
+        
+        return {
+            "platform": {
+                "system": platform.system(),
+                "release": platform.release(),
+                "version": platform.version(),
+                "machine": platform.machine(),
+                "processor": platform.processor(),
+            },
+            "resources": {
+                "cpu_count": psutil.cpu_count(),
+                "memory_total": psutil.virtual_memory().total,
+                "disk_total": psutil.disk_usage('/').total,
+            },
+            "prometheus_url": os.getenv("PROMETHEUS_URL", "http://localhost:9090"),
+            "database_url": os.getenv("DATABASE_URL", "sqlite:///./data/prometheus_retention.db"),
+        }
+    except Exception as e:
+        logger.error(f"Failed to get system info: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Configuration endpoints
+@app.get("/config")
+async def get_config():
+    """Get current application configuration"""
+    from config import Config
+    
+    return {
+        "prometheus_url": Config.PROMETHEUS_URL,
+        "retention_check_interval_hours": Config.RETENTION_CHECK_INTERVAL_HOURS,
+        "prometheus_timeout": Config.PROMETHEUS_TIMEOUT,
+        "api_host": Config.API_HOST,
+        "api_port": Config.API_PORT,
+        "log_level": Config.LOG_LEVEL,
+    }
+
+# Advanced Prometheus queries for dashboard widgets
+@app.get("/dashboard/metrics-summary")
+async def get_metrics_summary():
+    """Get summary statistics about metrics for dashboard widgets"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            # Get total number of series
+            series_response = await client.get(
+                f"{prometheus_url}/api/v1/query",
+                params={"query": "prometheus_tsdb_symbol_table_size_bytes"}
+            )
+            
+            # Get number of metrics
+            metrics_response = await client.get(
+                f"{prometheus_url}/api/v1/label/__name__/values"
+            )
+            
+            metrics_data = metrics_response.json() if metrics_response.status_code == 200 else {"data": []}
+            series_data = series_response.json() if series_response.status_code == 200 else {"data": {"result": []}}
+            
+            return {
+                "total_metrics": len(metrics_data.get("data", [])),
+                "total_series": len(series_data.get("data", {}).get("result", [])),
+                "status": "success"
+            }
+            
+    except Exception as e:
+        logger.error(f"Failed to get metrics summary: {e}")
+        return {
+            "total_metrics": 0,
+            "total_series": 0,
+            "status": "error",
             "error": str(e)
         }
 
 if __name__ == "__main__":
+    # Update requirements.txt to include httpx and psutil
+    logger.info("Starting Prometheus Management Console on http://0.0.0.0:8000")
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -3277,3 +3277,911 @@
 2025-08-07 18:20:32,433 - retention_service - INFO - Retention policy execution completed: 7 successful, 0 failed, 0 series actually deleted
 2025-08-07 18:20:32,436 - scheduler - INFO - Retention policy execution completed: 7 successful, 0 failed, 0 total series deleted
 2025-08-07 18:20:32,440 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 18:25:41 IDT)" executed successfully
+2025-08-07 18:37:31,749 - root - INFO - Starting Prometheus Management Console on http://0.0.0.0:8000
+2025-08-07 18:37:31,778 - root - INFO - Starting Prometheus Management Console...
+2025-08-07 18:37:31,784 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-07 18:37:31,789 - apscheduler.scheduler - INFO - Added job "Execute Retention Policies" to job store "default"
+2025-08-07 18:37:31,791 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-07 18:37:31,794 - scheduler - INFO - Retention policy scheduler started (interval: 0.0883 hours)
+2025-08-07 18:37:31,797 - root - INFO - Background scheduler started successfully
+2025-08-07 18:37:31,799 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 18:42:49 IDT)" (scheduled at 2025-08-07 18:37:31.784727+03:00)
+2025-08-07 18:37:31,803 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-07 18:37:31,819 - retention_service - INFO - Executing 7 enabled retention policies
+2025-08-07 18:37:31,830 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-07 18:37:31,833 - retention_service - INFO - Cutoff date: 2025-08-07T15:32:29.430709, Cutoff timestamp: 1754569949430
+2025-08-07 18:37:31,843 - retention_service - INFO - Found 0 metrics matching pattern 'prometheus_http_*'
+2025-08-07 18:37:31,846 - retention_service - WARNING - No metrics found matching pattern: prometheus_http_*
+2025-08-07 18:37:32,096 - retention_service - INFO - Policy 1 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:37:33,116 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-07 18:37:33,120 - retention_service - INFO - Cutoff date: 2025-08-06T15:37:33.116880, Cutoff timestamp: 1754483853116
+2025-08-07 18:37:33,128 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-07 18:37:33,134 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-07 18:37:33,313 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:37:34,338 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-07 18:37:34,341 - retention_service - INFO - Cutoff date: 2025-08-04T15:37:34.338744, Cutoff timestamp: 1754311054338
+2025-08-07 18:37:34,351 - retention_service - INFO - Found 0 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-07 18:37:34,355 - retention_service - WARNING - No metrics found matching pattern: probe_http_duration_seconds
+2025-08-07 18:37:34,528 - retention_service - INFO - Policy 3 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:37:35,554 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-07 18:37:35,558 - retention_service - INFO - Cutoff date: 2025-08-06T15:37:35.554905, Cutoff timestamp: 1754483855554
+2025-08-07 18:37:35,574 - retention_service - INFO - Found 0 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-07 18:37:35,579 - retention_service - WARNING - No metrics found matching pattern: probe_dns_lookup_time_seconds
+2025-08-07 18:37:35,760 - retention_service - INFO - Policy 4 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:37:36,785 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-07 18:37:36,790 - retention_service - INFO - Cutoff date: 2025-08-07T15:32:34.385695, Cutoff timestamp: 1754569954385
+2025-08-07 18:37:36,805 - retention_service - INFO - Found 0 metrics matching pattern 'probe_http_version'
+2025-08-07 18:37:36,811 - retention_service - WARNING - No metrics found matching pattern: probe_http_version
+2025-08-07 18:37:36,983 - retention_service - INFO - Policy 5 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:37:38,005 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-07 18:37:38,008 - retention_service - INFO - Cutoff date: 2025-08-06T15:37:38.005466, Cutoff timestamp: 1754483858005
+2025-08-07 18:37:38,014 - retention_service - INFO - Found 0 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-07 18:37:38,019 - retention_service - WARNING - No metrics found matching pattern: probe_ip_addr_hash
+2025-08-07 18:37:38,175 - retention_service - INFO - Policy 6 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:37:39,194 - retention_service - INFO - Executing policy 7: prometheus_api_notification_active_subscribers (retention: 2.0 days)
+2025-08-07 18:37:39,197 - retention_service - INFO - Cutoff date: 2025-08-05T15:37:39.194434, Cutoff timestamp: 1754397459194
+2025-08-07 18:37:39,206 - retention_service - INFO - Found 0 metrics matching pattern 'prometheus_api_notification_active_subscribers'
+2025-08-07 18:37:39,210 - retention_service - WARNING - No metrics found matching pattern: prometheus_api_notification_active_subscribers
+2025-08-07 18:37:39,363 - retention_service - INFO - Policy 7 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:37:40,373 - retention_service - INFO - Completed execution of 7 policies
+2025-08-07 18:37:40,377 - scheduler - INFO - Retention policy execution completed: 7 successful, 0 failed, 0 total series deleted
+2025-08-07 18:37:40,382 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 18:42:49 IDT)" executed successfully
+2025-08-07 18:38:33,394 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/query?query=probe_http_duration_seconds+offset+3d "HTTP/1.1 200 OK"
+2025-08-07 18:38:43,429 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/query?query=probe_http_duration_seconds "HTTP/1.1 200 OK"
+2025-08-07 18:38:51,490 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/alerts "HTTP/1.1 200 OK"
+2025-08-07 18:38:54,011 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/alerts "HTTP/1.1 200 OK"
+2025-08-07 18:38:57,754 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-07 18:39:05,901 - retention_service - INFO - Deleted retention policy ID 7
+2025-08-07 18:39:09,312 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/buildinfo "HTTP/1.1 200 OK"
+2025-08-07 18:39:09,327 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/flags "HTTP/1.1 200 OK"
+2025-08-07 18:39:09,345 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/runtimeinfo "HTTP/1.1 200 OK"
+2025-08-07 18:39:09,355 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/tsdb "HTTP/1.1 200 OK"
+2025-08-07 18:42:49,671 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 18:48:07 IDT)" (scheduled at 2025-08-07 18:42:49.664727+03:00)
+2025-08-07 18:42:49,676 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-07 18:42:49,684 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-07 18:42:49,692 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-07 18:42:49,695 - retention_service - INFO - Cutoff date: 2025-08-07T15:37:47.292564, Cutoff timestamp: 1754570267292
+2025-08-07 18:42:49,705 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-07 18:42:49,713 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-07 18:42:49,820 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-07 18:42:49,928 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-07 18:42:50,034 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-07 18:42:50,146 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-07 18:42:50,255 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-07 18:42:50,363 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-07 18:42:50,916 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-07 18:42:51,942 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-07 18:42:51,945 - retention_service - INFO - Cutoff date: 2025-08-06T15:42:51.941944, Cutoff timestamp: 1754484171941
+2025-08-07 18:42:51,955 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-07 18:42:51,959 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-07 18:42:52,130 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:42:53,150 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-07 18:42:53,154 - retention_service - INFO - Cutoff date: 2025-08-04T15:42:53.150563, Cutoff timestamp: 1754311373150
+2025-08-07 18:42:53,163 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-07 18:42:53,171 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-07 18:42:53,436 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:42:54,457 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-07 18:42:54,460 - retention_service - INFO - Cutoff date: 2025-08-06T15:42:54.457285, Cutoff timestamp: 1754484174457
+2025-08-07 18:42:54,468 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-07 18:42:54,475 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-07 18:42:54,775 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:42:55,774 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-07 18:42:55,777 - retention_service - INFO - Cutoff date: 2025-08-07T15:37:53.374124, Cutoff timestamp: 1754570273374
+2025-08-07 18:42:55,785 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-07 18:42:55,792 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-07 18:42:56,068 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:42:57,089 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-07 18:42:57,092 - retention_service - INFO - Cutoff date: 2025-08-06T15:42:57.089292, Cutoff timestamp: 1754484177089
+2025-08-07 18:42:57,100 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-07 18:42:57,108 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-07 18:42:57,382 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:42:58,386 - retention_service - INFO - Completed execution of 6 policies
+2025-08-07 18:42:58,391 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-07 18:42:58,397 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 18:48:07 IDT)" executed successfully
+2025-08-07 18:43:28,975 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/query?query=probe_http_duration_seconds "HTTP/1.1 200 OK"
+2025-08-07 18:45:29,927 - root - INFO - Starting Prometheus Management Console on http://0.0.0.0:8000
+2025-08-07 18:45:29,949 - root - INFO - Starting Prometheus Management Console...
+2025-08-07 18:45:29,958 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-07 18:45:29,962 - apscheduler.scheduler - INFO - Added job "Execute Retention Policies" to job store "default"
+2025-08-07 18:45:29,965 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-07 18:45:29,967 - scheduler - INFO - Retention policy scheduler started (interval: 0.0883 hours)
+2025-08-07 18:45:29,969 - root - INFO - Background scheduler started successfully
+2025-08-07 18:45:29,972 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 18:50:47 IDT)" (scheduled at 2025-08-07 18:45:29.956932+03:00)
+2025-08-07 18:45:29,975 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-07 18:45:29,992 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-07 18:45:30,006 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-07 18:45:30,012 - retention_service - INFO - Cutoff date: 2025-08-07T15:40:27.606874, Cutoff timestamp: 1754570427606
+2025-08-07 18:45:30,032 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-07 18:45:30,038 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-07 18:45:30,151 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-07 18:45:30,258 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-07 18:45:30,368 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-07 18:45:30,474 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-07 18:45:30,579 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-07 18:45:30,709 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-07 18:45:31,040 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-07 18:45:32,061 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-07 18:45:32,063 - retention_service - INFO - Cutoff date: 2025-08-06T15:45:32.060930, Cutoff timestamp: 1754484332060
+2025-08-07 18:45:32,068 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-07 18:45:32,072 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-07 18:45:32,271 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:45:33,300 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-07 18:45:33,304 - retention_service - INFO - Cutoff date: 2025-08-04T15:45:33.300897, Cutoff timestamp: 1754311533300
+2025-08-07 18:45:33,314 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-07 18:45:33,323 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-07 18:45:33,605 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:45:34,631 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-07 18:45:34,636 - retention_service - INFO - Cutoff date: 2025-08-06T15:45:34.631872, Cutoff timestamp: 1754484334631
+2025-08-07 18:45:34,648 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-07 18:45:34,658 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-07 18:45:34,989 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:45:36,012 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-07 18:45:36,016 - retention_service - INFO - Cutoff date: 2025-08-07T15:40:33.612825, Cutoff timestamp: 1754570433612
+2025-08-07 18:45:36,024 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-07 18:45:36,032 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-07 18:45:36,287 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:45:37,310 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-07 18:45:37,313 - retention_service - INFO - Cutoff date: 2025-08-06T15:45:37.309943, Cutoff timestamp: 1754484337309
+2025-08-07 18:45:37,325 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-07 18:45:37,336 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-07 18:45:37,612 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:45:38,621 - retention_service - INFO - Completed execution of 6 policies
+2025-08-07 18:45:38,624 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-07 18:45:38,627 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 18:50:47 IDT)" executed successfully
+2025-08-07 18:46:34,701 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/query?query=probe_http_duration_seconds+offset+3d "HTTP/1.1 200 OK"
+2025-08-07 18:46:36,323 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/query?query=probe_http_duration_seconds+offset+3d "HTTP/1.1 200 OK"
+2025-08-07 18:46:42,908 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/query?query=probe_http_duration_seconds "HTTP/1.1 200 OK"
+2025-08-07 18:48:17,027 - root - INFO - Starting Prometheus Management Console on http://0.0.0.0:8000
+2025-08-07 18:48:17,081 - root - INFO - Starting Prometheus Management Console...
+2025-08-07 18:48:17,089 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-07 18:48:17,094 - apscheduler.scheduler - INFO - Added job "Execute Retention Policies" to job store "default"
+2025-08-07 18:48:17,097 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-07 18:48:17,099 - scheduler - INFO - Retention policy scheduler started (interval: 0.0883 hours)
+2025-08-07 18:48:17,103 - root - INFO - Background scheduler started successfully
+2025-08-07 18:48:17,106 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 18:53:34 IDT)" (scheduled at 2025-08-07 18:48:17.089292+03:00)
+2025-08-07 18:48:17,109 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-07 18:48:17,126 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-07 18:48:17,139 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-07 18:48:17,142 - retention_service - INFO - Cutoff date: 2025-08-07T15:43:14.739304, Cutoff timestamp: 1754570594739
+2025-08-07 18:48:17,154 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-07 18:48:17,162 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-07 18:48:17,269 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-07 18:48:17,375 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-07 18:48:17,485 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-07 18:48:17,598 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-07 18:48:17,705 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-07 18:48:17,838 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-07 18:48:18,201 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-07 18:48:19,230 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-07 18:48:19,233 - retention_service - INFO - Cutoff date: 2025-08-06T15:48:19.230288, Cutoff timestamp: 1754484499230
+2025-08-07 18:48:19,246 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-07 18:48:19,254 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-07 18:48:19,484 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:48:20,512 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-07 18:48:20,515 - retention_service - INFO - Cutoff date: 2025-08-04T15:48:20.512099, Cutoff timestamp: 1754311700512
+2025-08-07 18:48:20,526 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-07 18:48:20,532 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-07 18:48:20,829 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:48:21,853 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-07 18:48:21,857 - retention_service - INFO - Cutoff date: 2025-08-06T15:48:21.853108, Cutoff timestamp: 1754484501853
+2025-08-07 18:48:21,870 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-07 18:48:21,880 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-07 18:48:22,153 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:48:23,169 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-07 18:48:23,173 - retention_service - INFO - Cutoff date: 2025-08-07T15:43:20.769096, Cutoff timestamp: 1754570600769
+2025-08-07 18:48:23,181 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-07 18:48:23,190 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-07 18:48:23,577 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:48:23,584 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/query?query=probe_http_duration_seconds+offset+3d "HTTP/1.1 200 OK"
+2025-08-07 18:48:24,595 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-07 18:48:24,598 - retention_service - INFO - Cutoff date: 2025-08-06T15:48:24.595334, Cutoff timestamp: 1754484504595
+2025-08-07 18:48:24,609 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-07 18:48:24,620 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-07 18:48:24,882 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:48:25,888 - retention_service - INFO - Completed execution of 6 policies
+2025-08-07 18:48:25,891 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-07 18:48:25,894 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 18:53:34 IDT)" executed successfully
+2025-08-07 18:48:27,941 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/query?query=probe_http_duration_seconds "HTTP/1.1 200 OK"
+2025-08-07 18:48:36,339 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/query?query=probe_http_version "HTTP/1.1 200 OK"
+2025-08-07 18:48:56,747 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/query_range?query=probe_http_version&start=1754495336&end=1754581736&step=432 "HTTP/1.1 200 OK"
+2025-08-07 18:49:10,056 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/alerts "HTTP/1.1 200 OK"
+2025-08-07 18:49:11,253 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-07 18:49:48,595 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/alerts "HTTP/1.1 200 OK"
+2025-08-07 18:49:49,204 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-07 18:49:49,777 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/alerts "HTTP/1.1 200 OK"
+2025-08-07 18:50:38,777 - root - INFO - Starting Prometheus Management Console on http://0.0.0.0:8000
+2025-08-07 18:50:38,799 - root - INFO - Starting Prometheus Management Console...
+2025-08-07 18:50:38,808 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-07 18:50:38,810 - apscheduler.scheduler - INFO - Added job "Execute Retention Policies" to job store "default"
+2025-08-07 18:50:38,813 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-07 18:50:38,817 - scheduler - INFO - Retention policy scheduler started (interval: 0.0883 hours)
+2025-08-07 18:50:38,820 - root - INFO - Background scheduler started successfully
+2025-08-07 18:50:38,823 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 18:55:56 IDT)" (scheduled at 2025-08-07 18:50:38.808003+03:00)
+2025-08-07 18:50:38,826 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-07 18:50:38,846 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-07 18:50:38,861 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-07 18:50:38,864 - retention_service - INFO - Cutoff date: 2025-08-07T15:45:36.461712, Cutoff timestamp: 1754570736461
+2025-08-07 18:50:38,878 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-07 18:50:38,888 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-07 18:50:38,997 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-07 18:50:39,105 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-07 18:50:39,215 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-07 18:50:39,325 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-07 18:50:39,434 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-07 18:50:39,541 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-07 18:50:39,813 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-07 18:50:40,839 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-07 18:50:40,843 - retention_service - INFO - Cutoff date: 2025-08-06T15:50:40.839563, Cutoff timestamp: 1754484640839
+2025-08-07 18:50:40,854 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-07 18:50:40,858 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-07 18:50:41,019 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:50:42,045 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-07 18:50:42,050 - retention_service - INFO - Cutoff date: 2025-08-04T15:50:42.045885, Cutoff timestamp: 1754311842045
+2025-08-07 18:50:42,065 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-07 18:50:42,075 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-07 18:50:42,354 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:50:43,379 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-07 18:50:43,383 - retention_service - INFO - Cutoff date: 2025-08-06T15:50:43.379747, Cutoff timestamp: 1754484643379
+2025-08-07 18:50:43,393 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-07 18:50:43,401 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-07 18:50:43,674 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:50:44,696 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-07 18:50:44,700 - retention_service - INFO - Cutoff date: 2025-08-07T15:45:42.296869, Cutoff timestamp: 1754570742296
+2025-08-07 18:50:44,710 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-07 18:50:44,717 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-07 18:50:44,995 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:50:46,024 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-07 18:50:46,027 - retention_service - INFO - Cutoff date: 2025-08-06T15:50:46.023947, Cutoff timestamp: 1754484646023
+2025-08-07 18:50:46,039 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-07 18:50:46,051 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-07 18:50:46,325 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:50:47,333 - retention_service - INFO - Completed execution of 6 policies
+2025-08-07 18:50:47,336 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-07 18:50:47,339 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 18:55:56 IDT)" executed successfully
+2025-08-07 18:50:51,885 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/alerts "HTTP/1.1 200 OK"
+2025-08-07 18:51:01,356 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-07 18:51:03,070 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/buildinfo "HTTP/1.1 200 OK"
+2025-08-07 18:51:03,077 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/flags "HTTP/1.1 200 OK"
+2025-08-07 18:51:03,090 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/runtimeinfo "HTTP/1.1 200 OK"
+2025-08-07 18:51:03,093 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/tsdb "HTTP/1.1 200 OK"
+2025-08-07 18:51:11,172 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/buildinfo "HTTP/1.1 200 OK"
+2025-08-07 18:51:11,186 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/runtimeinfo "HTTP/1.1 200 OK"
+2025-08-07 18:51:11,191 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/flags "HTTP/1.1 200 OK"
+2025-08-07 18:51:11,214 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/status/tsdb "HTTP/1.1 200 OK"
+2025-08-07 18:55:56,691 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 19:01:14 IDT)" (scheduled at 2025-08-07 18:55:56.688003+03:00)
+2025-08-07 18:55:56,702 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-07 18:55:56,713 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-07 18:55:56,726 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-07 18:55:56,729 - retention_service - INFO - Cutoff date: 2025-08-07T15:50:54.326694, Cutoff timestamp: 1754571054326
+2025-08-07 18:55:56,737 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-07 18:55:56,744 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-07 18:55:56,853 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-07 18:55:56,963 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-07 18:55:57,075 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-07 18:55:57,187 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-07 18:55:57,295 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-07 18:55:57,404 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-07 18:55:57,703 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-07 18:55:58,723 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-07 18:55:58,727 - retention_service - INFO - Cutoff date: 2025-08-06T15:55:58.723018, Cutoff timestamp: 1754484958723
+2025-08-07 18:55:58,733 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-07 18:55:58,739 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-07 18:55:58,886 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 18:55:59,903 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-07 18:55:59,907 - retention_service - INFO - Cutoff date: 2025-08-04T15:55:59.903421, Cutoff timestamp: 1754312159903
+2025-08-07 18:55:59,916 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-07 18:55:59,925 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-07 18:56:00,198 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:56:01,219 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-07 18:56:01,222 - retention_service - INFO - Cutoff date: 2025-08-06T15:56:01.218937, Cutoff timestamp: 1754484961218
+2025-08-07 18:56:01,232 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-07 18:56:01,241 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-07 18:56:01,502 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:56:02,525 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-07 18:56:02,529 - retention_service - INFO - Cutoff date: 2025-08-07T15:51:00.125418, Cutoff timestamp: 1754571060125
+2025-08-07 18:56:02,543 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-07 18:56:02,553 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-07 18:56:02,827 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:56:03,855 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-07 18:56:03,858 - retention_service - INFO - Cutoff date: 2025-08-06T15:56:03.855300, Cutoff timestamp: 1754484963855
+2025-08-07 18:56:03,868 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-07 18:56:03,875 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-07 18:56:04,154 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 18:56:05,162 - retention_service - INFO - Completed execution of 6 policies
+2025-08-07 18:56:05,165 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-07 18:56:05,169 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 19:01:14 IDT)" executed successfully
+2025-08-07 19:01:14,571 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 19:06:32 IDT)" (scheduled at 2025-08-07 19:01:14.568003+03:00)
+2025-08-07 19:01:14,576 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-07 19:01:14,587 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-07 19:01:14,599 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-07 19:01:14,601 - retention_service - INFO - Cutoff date: 2025-08-07T15:56:12.198782, Cutoff timestamp: 1754571372198
+2025-08-07 19:01:14,610 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-07 19:01:14,618 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-07 19:01:14,730 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-07 19:01:14,835 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-07 19:01:14,944 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-07 19:01:15,055 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-07 19:01:15,164 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-07 19:01:15,273 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-07 19:01:15,571 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-07 19:01:16,594 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-07 19:01:16,597 - retention_service - INFO - Cutoff date: 2025-08-06T16:01:16.594715, Cutoff timestamp: 1754485276594
+2025-08-07 19:01:16,605 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-07 19:01:16,610 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-07 19:01:16,810 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 19:01:17,829 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-07 19:01:17,832 - retention_service - INFO - Cutoff date: 2025-08-04T16:01:17.829609, Cutoff timestamp: 1754312477829
+2025-08-07 19:01:17,842 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-07 19:01:17,860 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-07 19:01:18,145 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 19:01:19,170 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-07 19:01:19,174 - retention_service - INFO - Cutoff date: 2025-08-06T16:01:19.170021, Cutoff timestamp: 1754485279170
+2025-08-07 19:01:19,186 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-07 19:01:19,198 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-07 19:01:19,482 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 19:01:20,504 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-07 19:01:20,507 - retention_service - INFO - Cutoff date: 2025-08-07T15:56:18.104490, Cutoff timestamp: 1754571378104
+2025-08-07 19:01:20,519 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-07 19:01:20,528 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-07 19:01:20,829 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 19:01:21,855 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-07 19:01:21,858 - retention_service - INFO - Cutoff date: 2025-08-06T16:01:21.855469, Cutoff timestamp: 1754485281855
+2025-08-07 19:01:21,867 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-07 19:01:21,879 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-07 19:01:22,157 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 19:01:23,163 - retention_service - INFO - Completed execution of 6 policies
+2025-08-07 19:01:23,167 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-07 19:01:23,172 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 19:06:32 IDT)" executed successfully
+2025-08-07 19:06:32,455 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 19:11:50 IDT)" (scheduled at 2025-08-07 19:06:32.448003+03:00)
+2025-08-07 19:06:32,463 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-07 19:06:32,483 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-07 19:06:32,492 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-07 19:06:32,495 - retention_service - INFO - Cutoff date: 2025-08-07T16:01:30.092337, Cutoff timestamp: 1754571690092
+2025-08-07 19:06:32,503 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-07 19:06:32,510 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-07 19:06:32,616 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-07 19:06:32,728 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-07 19:06:32,838 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-07 19:06:32,954 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-07 19:06:33,065 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-07 19:06:33,175 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-07 19:06:33,460 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-07 19:06:34,486 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-07 19:06:34,489 - retention_service - INFO - Cutoff date: 2025-08-06T16:06:34.485984, Cutoff timestamp: 1754485594485
+2025-08-07 19:06:34,497 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-07 19:06:34,502 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-07 19:06:34,667 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-07 19:06:35,684 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-07 19:06:35,687 - retention_service - INFO - Cutoff date: 2025-08-04T16:06:35.684294, Cutoff timestamp: 1754312795684
+2025-08-07 19:06:35,693 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-07 19:06:35,699 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-07 19:06:35,963 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 19:06:36,990 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-07 19:06:36,994 - retention_service - INFO - Cutoff date: 2025-08-06T16:06:36.990622, Cutoff timestamp: 1754485596990
+2025-08-07 19:06:37,005 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-07 19:06:37,013 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-07 19:06:37,293 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 19:06:38,318 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-07 19:06:38,321 - retention_service - INFO - Cutoff date: 2025-08-07T16:01:35.917943, Cutoff timestamp: 1754571695917
+2025-08-07 19:06:38,330 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-07 19:06:38,339 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-07 19:06:38,622 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 19:06:39,644 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-07 19:06:39,648 - retention_service - INFO - Cutoff date: 2025-08-06T16:06:39.644584, Cutoff timestamp: 1754485599644
+2025-08-07 19:06:39,657 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-07 19:06:39,665 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-07 19:06:40,929 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-07 19:06:41,940 - retention_service - INFO - Completed execution of 6 policies
+2025-08-07 19:06:41,943 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-07 19:06:41,946 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-07 19:11:50 IDT)" executed successfully
+2025-08-07 19:07:35,036 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-07 19:07:36,009 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/alerts "HTTP/1.1 200 OK"
+2025-08-08 12:38:53,613 - root - INFO - Starting Prometheus Management Console on http://0.0.0.0:8000
+2025-08-08 12:38:53,665 - root - INFO - Starting Prometheus Management Console...
+2025-08-08 12:38:53,674 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-08 12:38:53,678 - apscheduler.scheduler - INFO - Added job "Execute Retention Policies" to job store "default"
+2025-08-08 12:38:53,681 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-08 12:38:53,684 - scheduler - INFO - Retention policy scheduler started (interval: 0.0883 hours)
+2025-08-08 12:38:53,686 - root - INFO - Background scheduler started successfully
+2025-08-08 12:38:53,691 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 12:44:11 IDT)" (scheduled at 2025-08-08 12:38:53.674489+03:00)
+2025-08-08 12:38:53,694 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-08 12:38:53,716 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-08 12:38:53,731 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-08 12:38:53,734 - retention_service - INFO - Cutoff date: 2025-08-08T09:33:51.331884, Cutoff timestamp: 1754634831331
+2025-08-08 12:38:53,771 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-08 12:38:53,782 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-08 12:38:53,888 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-08 12:38:53,993 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-08 12:38:54,105 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-08 12:38:54,215 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-08 12:38:54,321 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-08 12:38:54,426 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-08 12:38:54,730 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-08 12:38:55,754 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-08 12:38:55,759 - retention_service - INFO - Cutoff date: 2025-08-07T09:38:55.754777, Cutoff timestamp: 1754548735754
+2025-08-08 12:38:55,771 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-08 12:38:55,777 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-08 12:38:55,958 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-08 12:38:56,979 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-08 12:38:56,983 - retention_service - INFO - Cutoff date: 2025-08-05T09:38:56.979697, Cutoff timestamp: 1754375936979
+2025-08-08 12:38:56,994 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-08 12:38:57,004 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-08 12:38:57,334 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:38:58,359 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-08 12:38:58,363 - retention_service - INFO - Cutoff date: 2025-08-07T09:38:58.359579, Cutoff timestamp: 1754548738359
+2025-08-08 12:38:58,373 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-08 12:38:58,380 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-08 12:38:58,649 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:38:59,665 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-08 12:38:59,668 - retention_service - INFO - Cutoff date: 2025-08-08T09:33:57.265295, Cutoff timestamp: 1754634837265
+2025-08-08 12:38:59,674 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-08 12:38:59,680 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-08 12:38:59,964 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:39:00,983 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-08 12:39:00,987 - retention_service - INFO - Cutoff date: 2025-08-07T09:39:00.983660, Cutoff timestamp: 1754548740983
+2025-08-08 12:39:00,994 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-08 12:39:01,001 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-08 12:39:01,265 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:39:02,270 - retention_service - INFO - Completed execution of 6 policies
+2025-08-08 12:39:02,274 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-08 12:39:02,277 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 12:44:11 IDT)" executed successfully
+2025-08-08 12:44:11,556 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 12:49:29 IDT)" (scheduled at 2025-08-08 12:44:11.554489+03:00)
+2025-08-08 12:44:11,562 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-08 12:44:11,573 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-08 12:44:11,584 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-08 12:44:11,587 - retention_service - INFO - Cutoff date: 2025-08-08T09:39:09.184585, Cutoff timestamp: 1754635149184
+2025-08-08 12:44:11,593 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-08 12:44:11,607 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-08 12:44:11,727 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-08 12:44:11,847 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-08 12:44:11,970 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-08 12:44:12,093 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-08 12:44:12,212 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-08 12:44:12,328 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-08 12:44:12,613 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-08 12:44:13,657 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-08 12:44:13,660 - retention_service - INFO - Cutoff date: 2025-08-07T09:44:13.657708, Cutoff timestamp: 1754549053657
+2025-08-08 12:44:13,667 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-08 12:44:13,671 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-08 12:44:13,830 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-08 12:44:14,854 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-08 12:44:14,859 - retention_service - INFO - Cutoff date: 2025-08-05T09:44:14.854923, Cutoff timestamp: 1754376254854
+2025-08-08 12:44:14,869 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-08 12:44:14,885 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-08 12:44:15,164 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:44:16,186 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-08 12:44:16,189 - retention_service - INFO - Cutoff date: 2025-08-07T09:44:16.185895, Cutoff timestamp: 1754549056185
+2025-08-08 12:44:16,197 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-08 12:44:16,212 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-08 12:44:16,489 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:44:17,492 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-08 12:44:17,496 - retention_service - INFO - Cutoff date: 2025-08-08T09:39:15.091959, Cutoff timestamp: 1754635155091
+2025-08-08 12:44:17,505 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-08 12:44:17,520 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-08 12:44:17,778 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:44:18,804 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-08 12:44:18,808 - retention_service - INFO - Cutoff date: 2025-08-07T09:44:18.804006, Cutoff timestamp: 1754549058804
+2025-08-08 12:44:18,821 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-08 12:44:18,836 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-08 12:44:19,147 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:44:20,151 - retention_service - INFO - Completed execution of 6 policies
+2025-08-08 12:44:20,155 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-08 12:44:20,158 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 12:49:29 IDT)" executed successfully
+2025-08-08 12:49:29,440 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 12:54:47 IDT)" (scheduled at 2025-08-08 12:49:29.434489+03:00)
+2025-08-08 12:49:29,445 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-08 12:49:29,456 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-08 12:49:29,465 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-08 12:49:29,468 - retention_service - INFO - Cutoff date: 2025-08-08T09:44:27.065124, Cutoff timestamp: 1754635467065
+2025-08-08 12:49:29,478 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-08 12:49:29,493 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-08 12:49:29,606 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-08 12:49:29,729 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-08 12:49:29,858 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-08 12:49:29,977 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-08 12:49:30,095 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-08 12:49:30,215 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-08 12:49:30,489 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-08 12:49:31,508 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-08 12:49:31,512 - retention_service - INFO - Cutoff date: 2025-08-07T09:49:31.508422, Cutoff timestamp: 1754549371508
+2025-08-08 12:49:31,522 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-08 12:49:31,525 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-08 12:49:31,691 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-08 12:49:32,716 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-08 12:49:32,719 - retention_service - INFO - Cutoff date: 2025-08-05T09:49:32.716221, Cutoff timestamp: 1754376572716
+2025-08-08 12:49:32,728 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-08 12:49:32,743 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-08 12:49:33,016 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:49:34,039 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-08 12:49:34,042 - retention_service - INFO - Cutoff date: 2025-08-07T09:49:34.039868, Cutoff timestamp: 1754549374039
+2025-08-08 12:49:34,050 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-08 12:49:34,068 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-08 12:49:34,342 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:49:35,371 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-08 12:49:35,375 - retention_service - INFO - Cutoff date: 2025-08-08T09:44:32.971656, Cutoff timestamp: 1754635472971
+2025-08-08 12:49:35,382 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-08 12:49:35,399 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-08 12:49:35,700 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:49:36,723 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-08 12:49:36,726 - retention_service - INFO - Cutoff date: 2025-08-07T09:49:36.723184, Cutoff timestamp: 1754549376723
+2025-08-08 12:49:36,741 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-08 12:49:36,760 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-08 12:49:37,065 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:49:38,069 - retention_service - INFO - Completed execution of 6 policies
+2025-08-08 12:49:38,073 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-08 12:49:38,077 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 12:54:47 IDT)" executed successfully
+2025-08-08 12:54:47,317 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:00:05 IDT)" (scheduled at 2025-08-08 12:54:47.314489+03:00)
+2025-08-08 12:54:47,322 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-08 12:54:47,338 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-08 12:54:47,346 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-08 12:54:47,351 - retention_service - INFO - Cutoff date: 2025-08-08T09:49:44.946683, Cutoff timestamp: 1754635784946
+2025-08-08 12:54:47,361 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-08 12:54:47,377 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-08 12:54:47,495 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-08 12:54:47,612 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-08 12:54:47,728 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-08 12:54:47,851 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-08 12:54:47,965 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-08 12:54:48,093 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-08 12:54:48,380 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-08 12:54:49,399 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-08 12:54:49,403 - retention_service - INFO - Cutoff date: 2025-08-07T09:54:49.399539, Cutoff timestamp: 1754549689399
+2025-08-08 12:54:49,412 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-08 12:54:49,417 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-08 12:54:49,569 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-08 12:54:50,585 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-08 12:54:50,588 - retention_service - INFO - Cutoff date: 2025-08-05T09:54:50.585339, Cutoff timestamp: 1754376890585
+2025-08-08 12:54:50,594 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-08 12:54:50,607 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-08 12:54:50,874 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:54:51,899 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-08 12:54:51,902 - retention_service - INFO - Cutoff date: 2025-08-07T09:54:51.899542, Cutoff timestamp: 1754549691899
+2025-08-08 12:54:51,915 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-08 12:54:51,931 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-08 12:54:52,204 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:54:53,226 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-08 12:54:53,231 - retention_service - INFO - Cutoff date: 2025-08-08T09:49:50.826658, Cutoff timestamp: 1754635790826
+2025-08-08 12:54:53,240 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-08 12:54:53,256 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-08 12:54:53,504 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:54:54,527 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-08 12:54:54,531 - retention_service - INFO - Cutoff date: 2025-08-07T09:54:54.527809, Cutoff timestamp: 1754549694527
+2025-08-08 12:54:54,542 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-08 12:54:54,561 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-08 12:54:54,857 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 12:54:55,861 - retention_service - INFO - Completed execution of 6 policies
+2025-08-08 12:54:55,863 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-08 12:54:55,868 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:00:05 IDT)" executed successfully
+2025-08-08 13:13:16,084 - apscheduler.executors.default - WARNING - Run time of job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:15:58 IDT)" was missed by 0:02:35.130133
+2025-08-08 13:14:02,633 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-08 13:15:33,723 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-08 13:15:58,839 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:21:16 IDT)" (scheduled at 2025-08-08 13:15:58.834489+03:00)
+2025-08-08 13:15:58,842 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-08 13:15:58,853 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-08 13:15:58,864 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-08 13:15:58,866 - retention_service - INFO - Cutoff date: 2025-08-08T10:10:56.463978, Cutoff timestamp: 1754637056463
+2025-08-08 13:15:58,871 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-08 13:15:58,885 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-08 13:15:59,013 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-08 13:15:59,134 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-08 13:15:59,262 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-08 13:15:59,388 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-08 13:15:59,518 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-08 13:15:59,637 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-08 13:15:59,927 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-08 13:16:00,945 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-08 13:16:00,948 - retention_service - INFO - Cutoff date: 2025-08-07T10:16:00.945794, Cutoff timestamp: 1754550960945
+2025-08-08 13:16:00,955 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-08 13:16:00,961 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-08 13:16:01,117 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-08 13:16:02,140 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-08 13:16:02,143 - retention_service - INFO - Cutoff date: 2025-08-05T10:16:02.140189, Cutoff timestamp: 1754378162140
+2025-08-08 13:16:02,150 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-08 13:16:02,174 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-08 13:16:02,431 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:16:03,454 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-08 13:16:03,457 - retention_service - INFO - Cutoff date: 2025-08-07T10:16:03.454087, Cutoff timestamp: 1754550963454
+2025-08-08 13:16:03,467 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-08 13:16:03,489 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-08 13:16:03,770 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:16:04,786 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-08 13:16:04,789 - retention_service - INFO - Cutoff date: 2025-08-08T10:11:02.386666, Cutoff timestamp: 1754637062386
+2025-08-08 13:16:04,794 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-08 13:16:04,810 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-08 13:16:05,079 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:16:06,106 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-08 13:16:06,109 - retention_service - INFO - Cutoff date: 2025-08-07T10:16:06.106740, Cutoff timestamp: 1754550966106
+2025-08-08 13:16:06,118 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-08 13:16:06,136 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-08 13:16:06,414 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:16:07,418 - retention_service - INFO - Completed execution of 6 policies
+2025-08-08 13:16:07,424 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-08 13:16:07,428 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:21:16 IDT)" executed successfully
+2025-08-08 13:20:05,164 - root - INFO - Starting Prometheus Management Console on http://0.0.0.0:8000
+2025-08-08 13:20:05,189 - root - INFO - Starting Prometheus Management Console...
+2025-08-08 13:20:05,197 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-08 13:20:05,200 - apscheduler.scheduler - INFO - Added job "Execute Retention Policies" to job store "default"
+2025-08-08 13:20:05,202 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-08 13:20:05,205 - scheduler - INFO - Retention policy scheduler started (interval: 0.0883 hours)
+2025-08-08 13:20:05,207 - root - INFO - Background scheduler started successfully
+2025-08-08 13:20:05,209 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:25:23 IDT)" (scheduled at 2025-08-08 13:20:05.197128+03:00)
+2025-08-08 13:20:05,212 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-08 13:20:05,228 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-08 13:20:05,240 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-08 13:20:05,242 - retention_service - INFO - Cutoff date: 2025-08-08T10:15:02.840057, Cutoff timestamp: 1754637302840
+2025-08-08 13:20:05,255 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-08 13:20:05,268 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-08 13:20:05,380 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-08 13:20:05,507 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-08 13:20:05,619 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-08 13:20:05,748 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-08 13:20:05,878 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-08 13:20:06,004 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-08 13:20:06,302 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-08 13:20:07,328 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-08 13:20:07,331 - retention_service - INFO - Cutoff date: 2025-08-07T10:20:07.328019, Cutoff timestamp: 1754551207328
+2025-08-08 13:20:07,341 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-08 13:20:07,346 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-08 13:20:07,530 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-08 13:20:08,553 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-08 13:20:08,557 - retention_service - INFO - Cutoff date: 2025-08-05T10:20:08.553062, Cutoff timestamp: 1754378408553
+2025-08-08 13:20:08,568 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-08 13:20:08,588 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-08 13:20:08,836 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:20:09,855 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-08 13:20:09,859 - retention_service - INFO - Cutoff date: 2025-08-07T10:20:09.855858, Cutoff timestamp: 1754551209855
+2025-08-08 13:20:09,868 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-08 13:20:09,885 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-08 13:20:10,170 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:20:11,190 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-08 13:20:11,194 - retention_service - INFO - Cutoff date: 2025-08-08T10:15:08.790001, Cutoff timestamp: 1754637308790
+2025-08-08 13:20:11,201 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-08 13:20:11,215 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-08 13:20:11,528 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:20:12,606 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-08 13:20:12,609 - retention_service - INFO - Cutoff date: 2025-08-07T10:20:12.606770, Cutoff timestamp: 1754551212606
+2025-08-08 13:20:12,615 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-08 13:20:12,629 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-08 13:20:12,910 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:20:13,919 - retention_service - INFO - Completed execution of 6 policies
+2025-08-08 13:20:13,924 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-08 13:20:13,927 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:25:23 IDT)" executed successfully
+2025-08-08 13:20:39,085 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-08 13:21:21,505 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-08 13:24:10,832 - root - INFO - Starting Prometheus Management Console on http://0.0.0.0:8000
+2025-08-08 13:24:10,884 - root - INFO - Starting Prometheus Management Console...
+2025-08-08 13:24:10,898 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-08 13:24:10,903 - apscheduler.scheduler - INFO - Added job "Execute Retention Policies" to job store "default"
+2025-08-08 13:24:10,908 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-08 13:24:10,911 - scheduler - INFO - Retention policy scheduler started (interval: 0.0883 hours)
+2025-08-08 13:24:10,916 - root - INFO - Background scheduler started successfully
+2025-08-08 13:24:10,919 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:29:28 IDT)" (scheduled at 2025-08-08 13:24:10.898146+03:00)
+2025-08-08 13:24:10,926 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-08 13:24:10,958 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-08 13:24:10,974 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-08 13:24:10,978 - retention_service - INFO - Cutoff date: 2025-08-08T10:19:08.574932, Cutoff timestamp: 1754637548574
+2025-08-08 13:24:10,999 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-08 13:24:11,019 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-08 13:24:11,150 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-08 13:24:11,268 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-08 13:24:11,389 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-08 13:24:11,517 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-08 13:24:11,644 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-08 13:24:11,760 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-08 13:24:12,051 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-08 13:24:13,076 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-08 13:24:13,079 - retention_service - INFO - Cutoff date: 2025-08-07T10:24:13.076490, Cutoff timestamp: 1754551453076
+2025-08-08 13:24:13,089 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-08 13:24:13,094 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-08 13:24:13,258 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-08 13:24:14,276 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-08 13:24:14,281 - retention_service - INFO - Cutoff date: 2025-08-05T10:24:14.276306, Cutoff timestamp: 1754378654276
+2025-08-08 13:24:14,290 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-08 13:24:14,311 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-08 13:24:14,582 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:24:15,593 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-08 13:24:15,597 - retention_service - INFO - Cutoff date: 2025-08-07T10:24:15.592743, Cutoff timestamp: 1754551455592
+2025-08-08 13:24:15,606 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-08 13:24:15,628 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-08 13:24:15,899 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:24:16,917 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-08 13:24:16,921 - retention_service - INFO - Cutoff date: 2025-08-08T10:19:14.517565, Cutoff timestamp: 1754637554517
+2025-08-08 13:24:16,929 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-08 13:24:16,942 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-08 13:24:17,239 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:24:18,259 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-08 13:24:18,262 - retention_service - INFO - Cutoff date: 2025-08-07T10:24:18.259816, Cutoff timestamp: 1754551458259
+2025-08-08 13:24:18,269 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-08 13:24:18,287 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-08 13:24:18,571 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:24:19,577 - retention_service - INFO - Completed execution of 6 policies
+2025-08-08 13:24:19,581 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-08 13:24:19,583 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:29:28 IDT)" executed successfully
+2025-08-08 13:24:23,668 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-08 13:24:25,758 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/alerts "HTTP/1.1 200 OK"
+2025-08-08 13:24:26,520 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-08 13:24:27,131 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/alerts "HTTP/1.1 200 OK"
+2025-08-08 13:24:31,103 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-08 13:27:48,115 - root - INFO - Starting Prometheus Management Console on http://0.0.0.0:8000
+2025-08-08 13:27:48,145 - root - INFO - Starting Prometheus Management Console...
+2025-08-08 13:27:48,155 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-08 13:27:48,158 - apscheduler.scheduler - INFO - Added job "Execute Retention Policies" to job store "default"
+2025-08-08 13:27:48,161 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-08 13:27:48,165 - scheduler - INFO - Retention policy scheduler started (interval: 0.0883 hours)
+2025-08-08 13:27:48,168 - root - INFO - Background scheduler started successfully
+2025-08-08 13:27:48,171 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:33:06 IDT)" (scheduled at 2025-08-08 13:27:48.154888+03:00)
+2025-08-08 13:27:48,175 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-08 13:27:48,192 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-08 13:27:48,205 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-08 13:27:48,208 - retention_service - INFO - Cutoff date: 2025-08-08T10:22:45.805348, Cutoff timestamp: 1754637765805
+2025-08-08 13:27:48,221 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-08 13:27:48,235 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-08 13:27:48,362 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-08 13:27:48,479 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-08 13:27:48,597 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-08 13:27:48,716 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-08 13:27:48,847 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-08 13:27:48,967 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-08 13:27:49,264 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-08 13:27:50,281 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-08 13:27:50,283 - retention_service - INFO - Cutoff date: 2025-08-07T10:27:50.281114, Cutoff timestamp: 1754551670281
+2025-08-08 13:27:50,291 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-08 13:27:50,296 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-08 13:27:50,453 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-08 13:27:51,480 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-08 13:27:51,484 - retention_service - INFO - Cutoff date: 2025-08-05T10:27:51.480459, Cutoff timestamp: 1754378871480
+2025-08-08 13:27:51,518 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-08 13:27:51,536 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-08 13:27:51,817 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:27:52,841 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-08 13:27:52,846 - retention_service - INFO - Cutoff date: 2025-08-07T10:27:52.841426, Cutoff timestamp: 1754551672841
+2025-08-08 13:27:52,855 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-08 13:27:52,877 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-08 13:27:53,132 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:27:54,156 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-08 13:27:54,160 - retention_service - INFO - Cutoff date: 2025-08-08T10:22:51.756309, Cutoff timestamp: 1754637771756
+2025-08-08 13:27:54,171 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-08 13:27:54,186 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-08 13:27:54,462 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:27:55,485 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-08 13:27:55,488 - retention_service - INFO - Cutoff date: 2025-08-07T10:27:55.485173, Cutoff timestamp: 1754551675485
+2025-08-08 13:27:55,494 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-08 13:27:55,511 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-08 13:27:55,785 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:27:56,789 - retention_service - INFO - Completed execution of 6 policies
+2025-08-08 13:27:56,794 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-08 13:27:56,797 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:33:06 IDT)" executed successfully
+2025-08-08 13:33:06,039 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:38:23 IDT)" (scheduled at 2025-08-08 13:33:06.034888+03:00)
+2025-08-08 13:33:06,053 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-08 13:33:06,067 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-08 13:33:06,079 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-08 13:33:06,082 - retention_service - INFO - Cutoff date: 2025-08-08T10:28:03.679551, Cutoff timestamp: 1754638083679
+2025-08-08 13:33:06,089 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-08 13:33:06,104 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-08 13:33:06,228 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-08 13:33:06,350 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-08 13:33:06,478 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-08 13:33:06,607 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-08 13:33:06,737 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-08 13:33:06,862 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-08 13:33:07,125 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-08 13:33:08,145 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-08 13:33:08,148 - retention_service - INFO - Cutoff date: 2025-08-07T10:33:08.145416, Cutoff timestamp: 1754551988145
+2025-08-08 13:33:08,158 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-08 13:33:08,161 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-08 13:33:08,326 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-08 13:33:09,353 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-08 13:33:09,356 - retention_service - INFO - Cutoff date: 2025-08-05T10:33:09.353537, Cutoff timestamp: 1754379189353
+2025-08-08 13:33:09,368 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-08 13:33:09,389 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-08 13:33:09,721 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:33:10,744 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-08 13:33:10,748 - retention_service - INFO - Cutoff date: 2025-08-07T10:33:10.744585, Cutoff timestamp: 1754551990744
+2025-08-08 13:33:10,760 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-08 13:33:10,778 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-08 13:33:11,056 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:33:12,078 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-08 13:33:12,081 - retention_service - INFO - Cutoff date: 2025-08-08T10:28:09.678276, Cutoff timestamp: 1754638089678
+2025-08-08 13:33:12,087 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-08 13:33:12,103 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-08 13:33:12,365 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:33:13,388 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-08 13:33:13,392 - retention_service - INFO - Cutoff date: 2025-08-07T10:33:13.388518, Cutoff timestamp: 1754551993388
+2025-08-08 13:33:13,402 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-08 13:33:13,419 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-08 13:33:13,711 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:33:14,717 - retention_service - INFO - Completed execution of 6 policies
+2025-08-08 13:33:14,721 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-08 13:33:14,725 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:38:23 IDT)" executed successfully
+2025-08-08 13:33:22,289 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-08 13:33:57,994 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-08 13:38:23,920 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:43:41 IDT)" (scheduled at 2025-08-08 13:38:23.914888+03:00)
+2025-08-08 13:38:23,925 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-08 13:38:23,936 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-08 13:38:23,946 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-08 13:38:23,949 - retention_service - INFO - Cutoff date: 2025-08-08T10:33:21.546624, Cutoff timestamp: 1754638401546
+2025-08-08 13:38:23,957 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-08 13:38:23,973 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-08 13:38:24,100 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-08 13:38:24,227 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-08 13:38:24,359 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-08 13:38:24,482 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-08 13:38:24,609 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-08 13:38:24,734 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-08 13:38:25,001 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-08 13:38:26,028 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-08 13:38:26,032 - retention_service - INFO - Cutoff date: 2025-08-07T10:38:26.028480, Cutoff timestamp: 1754552306028
+2025-08-08 13:38:26,052 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-08 13:38:26,055 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-08 13:38:26,215 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-08 13:38:27,235 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-08 13:38:27,238 - retention_service - INFO - Cutoff date: 2025-08-05T10:38:27.235500, Cutoff timestamp: 1754379507235
+2025-08-08 13:38:27,245 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-08 13:38:27,259 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-08 13:38:27,529 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:38:28,549 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-08 13:38:28,553 - retention_service - INFO - Cutoff date: 2025-08-07T10:38:28.549500, Cutoff timestamp: 1754552308549
+2025-08-08 13:38:28,564 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-08 13:38:28,582 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-08 13:38:28,853 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:38:29,883 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-08 13:38:29,887 - retention_service - INFO - Cutoff date: 2025-08-08T10:33:27.483798, Cutoff timestamp: 1754638407483
+2025-08-08 13:38:29,895 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-08 13:38:29,914 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-08 13:38:30,174 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:38:31,191 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-08 13:38:31,194 - retention_service - INFO - Cutoff date: 2025-08-07T10:38:31.191283, Cutoff timestamp: 1754552311191
+2025-08-08 13:38:31,200 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-08 13:38:31,212 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-08 13:38:31,503 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:38:32,511 - retention_service - INFO - Completed execution of 6 policies
+2025-08-08 13:38:32,514 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-08 13:38:32,517 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:43:41 IDT)" executed successfully
+2025-08-08 13:39:31,059 - root - INFO - Starting Prometheus Management Console on http://0.0.0.0:8000
+2025-08-08 13:39:31,082 - root - INFO - Starting Prometheus Management Console...
+2025-08-08 13:39:31,091 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-08 13:39:31,096 - apscheduler.scheduler - INFO - Added job "Execute Retention Policies" to job store "default"
+2025-08-08 13:39:31,099 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-08 13:39:31,101 - scheduler - INFO - Retention policy scheduler started (interval: 0.0883 hours)
+2025-08-08 13:39:31,103 - root - INFO - Background scheduler started successfully
+2025-08-08 13:39:31,106 - apscheduler.executors.default - INFO - Running job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:44:48 IDT)" (scheduled at 2025-08-08 13:39:31.091414+03:00)
+2025-08-08 13:39:31,109 - scheduler - INFO - Starting scheduled retention policy execution
+2025-08-08 13:39:31,124 - retention_service - INFO - Executing 6 enabled retention policies
+2025-08-08 13:39:31,137 - retention_service - INFO - Executing policy 1: prometheus_http_* (retention: 0.0035 days)
+2025-08-08 13:39:31,140 - retention_service - INFO - Cutoff date: 2025-08-08T10:34:28.737512, Cutoff timestamp: 1754638468737
+2025-08-08 13:39:31,153 - retention_service - INFO - Found 7 metrics matching pattern 'prometheus_http_*'
+2025-08-08 13:39:31,171 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_bucket
+2025-08-08 13:39:31,289 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_count
+2025-08-08 13:39:31,408 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_request_duration_seconds_sum
+2025-08-08 13:39:31,525 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_requests_total
+2025-08-08 13:39:31,644 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_bucket
+2025-08-08 13:39:31,774 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_count
+2025-08-08 13:39:31,894 - retention_service - INFO - Successfully deleted old data for metric: prometheus_http_response_size_bytes_sum
+2025-08-08 13:39:32,218 - retention_service - INFO - Policy 1 executed successfully: 7 series deleted from 7 metrics
+2025-08-08 13:39:33,235 - retention_service - INFO - Executing policy 2: cpu_usage_* (retention: 1.0 days)
+2025-08-08 13:39:33,240 - retention_service - INFO - Cutoff date: 2025-08-07T10:39:33.235642, Cutoff timestamp: 1754552373235
+2025-08-08 13:39:33,248 - retention_service - INFO - Found 0 metrics matching pattern 'cpu_usage_*'
+2025-08-08 13:39:33,252 - retention_service - WARNING - No metrics found matching pattern: cpu_usage_*
+2025-08-08 13:39:33,424 - retention_service - INFO - Policy 2 executed successfully: 0 series deleted from 0 metrics
+2025-08-08 13:39:34,449 - retention_service - INFO - Executing policy 3: probe_http_duration_seconds (retention: 3.0 days)
+2025-08-08 13:39:34,453 - retention_service - INFO - Cutoff date: 2025-08-05T10:39:34.449684, Cutoff timestamp: 1754379574449
+2025-08-08 13:39:34,463 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_duration_seconds'
+2025-08-08 13:39:34,479 - retention_service - INFO - Successfully deleted old data for metric: probe_http_duration_seconds
+2025-08-08 13:39:34,768 - retention_service - INFO - Policy 3 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:39:35,752 - httpx - INFO - HTTP Request: GET http://prometheus:9090/api/v1/targets "HTTP/1.1 200 OK"
+2025-08-08 13:39:35,786 - retention_service - INFO - Executing policy 4: probe_dns_lookup_time_seconds (retention: 1.0 days)
+2025-08-08 13:39:35,789 - retention_service - INFO - Cutoff date: 2025-08-07T10:39:35.786304, Cutoff timestamp: 1754552375786
+2025-08-08 13:39:35,800 - retention_service - INFO - Found 1 metrics matching pattern 'probe_dns_lookup_time_seconds'
+2025-08-08 13:39:35,817 - retention_service - INFO - Successfully deleted old data for metric: probe_dns_lookup_time_seconds
+2025-08-08 13:39:36,102 - retention_service - INFO - Policy 4 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:39:37,137 - retention_service - INFO - Executing policy 5: probe_http_version (retention: 0.0035 days)
+2025-08-08 13:39:37,143 - retention_service - INFO - Cutoff date: 2025-08-08T10:34:34.737631, Cutoff timestamp: 1754638474737
+2025-08-08 13:39:37,155 - retention_service - INFO - Found 1 metrics matching pattern 'probe_http_version'
+2025-08-08 13:39:37,175 - retention_service - INFO - Successfully deleted old data for metric: probe_http_version
+2025-08-08 13:39:37,457 - retention_service - INFO - Policy 5 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:39:38,478 - retention_service - INFO - Executing policy 6: probe_ip_addr_hash (retention: 1.0 days)
+2025-08-08 13:39:38,482 - retention_service - INFO - Cutoff date: 2025-08-07T10:39:38.478535, Cutoff timestamp: 1754552378478
+2025-08-08 13:39:38,489 - retention_service - INFO - Found 1 metrics matching pattern 'probe_ip_addr_hash'
+2025-08-08 13:39:38,510 - retention_service - INFO - Successfully deleted old data for metric: probe_ip_addr_hash
+2025-08-08 13:39:38,803 - retention_service - INFO - Policy 6 executed successfully: 1 series deleted from 1 metrics
+2025-08-08 13:39:39,810 - retention_service - INFO - Completed execution of 6 policies
+2025-08-08 13:39:39,814 - scheduler - INFO - Retention policy execution completed: 6 successful, 0 failed, 11 total series deleted
+2025-08-08 13:39:39,817 - apscheduler.executors.default - INFO - Job "Execute Retention Policies (trigger: interval[0:05:17.880000], next run at: 2025-08-08 13:44:48 IDT)" executed successfully
