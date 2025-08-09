@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
@@ -9,6 +9,7 @@ import os
 import httpx
 import asyncio
 from urllib.parse import urlencode
+import json
 
 from database import get_db, engine
 from models import RetentionPolicyCreate, RetentionPolicyResponse, RetentionPolicyUpdate
@@ -94,6 +95,186 @@ async def serve_ui():
         </html>
         """)
 
+# FIXED: Prometheus Proxy Endpoints with proper streaming response
+@app.get("/api/v1/{path:path}")
+@app.post("/api/v1/{path:path}")
+async def prometheus_proxy(path: str, request: Request):
+    """Proxy requests to Prometheus API to avoid CORS issues"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        # Build the target URL
+        target_url = f"{prometheus_url}/api/v1/{path}"
+        
+        # Get query parameters
+        query_params = dict(request.query_params)
+        if query_params:
+            target_url += f"?{urlencode(query_params)}"
+        
+        # Get request body for POST requests
+        body = None
+        if request.method == "POST":
+            body = await request.body()
+        
+        # Make the request to Prometheus
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.request(
+                method=request.method,
+                url=target_url,
+                content=body
+            )
+            
+            # Create a streaming response that doesn't declare content-length
+            async def generate():
+                async for chunk in response.aiter_bytes():
+                    yield chunk
+            
+            # Get content type from response
+            content_type = response.headers.get('content-type', 'application/json')
+            
+            return StreamingResponse(
+                generate(),
+                status_code=response.status_code,
+                headers={
+                    'content-type': content_type,
+                    'access-control-allow-origin': '*',
+                    'access-control-allow-methods': 'GET, POST, OPTIONS',
+                    'access-control-allow-headers': '*'
+                }
+            )
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Prometheus request timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        logger.error(f"Proxy error: {e}")
+        raise HTTPException(status_code=500, detail=f"Proxy error: {str(e)}")
+
+# Alternative simpler endpoints that work with JSON directly
+@app.post("/prometheus-proxy/query")
+async def prometheus_query_direct(request: Dict[str, Any]):
+    """Execute a PromQL query - Direct JSON endpoint"""
+    query = request.get("query", "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="Query is required")
+    
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                f"{prometheus_url}/api/v1/query",
+                params={"query": query}
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            # Parse JSON and return directly - let FastAPI handle content-length
+            json_data = response.json()
+            return json_data
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Query timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        logger.error(f"Query error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/prometheus-proxy/metrics")
+async def get_prometheus_metrics_direct():
+    """Get list of available metrics from Prometheus - Direct JSON endpoint"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(f"{prometheus_url}/api/v1/label/__name__/values")
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            json_data = response.json()
+            return json_data
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Request timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        logger.error(f"Metrics error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/prometheus-proxy/targets")
+async def get_prometheus_targets():
+    """Get targets from Prometheus"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(f"{prometheus_url}/api/v1/targets")
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            json_data = response.json()
+            return json_data
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Request timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        logger.error(f"Targets error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/prometheus-proxy/alerts")
+async def get_prometheus_alerts():
+    """Get alerts from Prometheus"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(f"{prometheus_url}/api/v1/alerts")
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            json_data = response.json()
+            return json_data
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Request timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        logger.error(f"Alerts error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/prometheus-proxy/status/{info_type}")
+async def get_prometheus_status(info_type: str):
+    """Get status info from Prometheus"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(f"{prometheus_url}/api/v1/status/{info_type}")
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            json_data = response.json()
+            return json_data
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Request timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        logger.error(f"Status error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Debug endpoints for troubleshooting
 @app.get("/debug/metrics-sample")
 async def get_metrics_sample():
@@ -149,96 +330,6 @@ async def dry_run_policy(policy_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Failed to execute dry run for policy {policy_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-# Prometheus Proxy Endpoints
-@app.get("/api/v1/{path:path}")
-@app.post("/api/v1/{path:path}")
-async def prometheus_proxy(path: str, request: Request):
-    """Proxy requests to Prometheus API to avoid CORS issues"""
-    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
-    
-    try:
-        # Build the target URL
-        target_url = f"{prometheus_url}/api/v1/{path}"
-        
-        # Get query parameters
-        query_params = dict(request.query_params)
-        if query_params:
-            target_url += f"?{urlencode(query_params)}"
-        
-        # Get request body for POST requests
-        body = None
-        if request.method == "POST":
-            body = await request.body()
-        
-        # Make the request to Prometheus
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.request(
-                method=request.method,
-                url=target_url,
-                headers=dict(request.headers),
-                content=body
-            )
-            
-            # Return the response
-            return JSONResponse(
-                content=response.json() if response.headers.get('content-type', '').startswith('application/json') else response.text,
-                status_code=response.status_code,
-                headers=dict(response.headers)
-            )
-            
-    except httpx.TimeoutException:
-        raise HTTPException(status_code=504, detail="Prometheus request timed out")
-    except httpx.RequestError as e:
-        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Proxy error: {str(e)}")
-
-# Prometheus-specific endpoints for the UI
-@app.post("/prometheus-proxy/query")
-async def prometheus_query(request: Dict[str, Any]):
-    """Execute a PromQL query"""
-    query = request.get("query", "").strip()
-    if not query:
-        raise HTTPException(status_code=400, detail="Query is required")
-    
-    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
-    
-    try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
-                f"{prometheus_url}/api/v1/query",
-                params={"query": query}
-            )
-            
-            if response.status_code != 200:
-                raise HTTPException(status_code=response.status_code, detail=response.text)
-            
-            return response.json()
-            
-    except httpx.TimeoutException:
-        raise HTTPException(status_code=504, detail="Query timed out")
-    except httpx.RequestError as e:
-        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
-
-@app.get("/prometheus-proxy/metrics")
-async def get_prometheus_metrics():
-    """Get list of available metrics from Prometheus"""
-    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
-    
-    try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(f"{prometheus_url}/api/v1/label/__name__/values")
-            
-            if response.status_code != 200:
-                raise HTTPException(status_code=response.status_code, detail=response.text)
-            
-            return response.json()
-            
-    except httpx.TimeoutException:
-        raise HTTPException(status_code=504, detail="Request timed out")
-    except httpx.RequestError as e:
-        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
 
 # Retention Policy Management Endpoints
 @app.post("/retention-policies", response_model=RetentionPolicyResponse)
