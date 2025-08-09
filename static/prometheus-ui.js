@@ -135,23 +135,65 @@ async function checkApiHealth() {
 }
 
 // Fixed API call function
+// Fixed API call function in prometheus-ui.js
+// Fixed API call function 
 async function callPrometheusAPI(endpoint, params = {}) {
     try {
-        let url = `${API_BASE}/api/v1/${endpoint}`;
+        // Map common endpoints to our direct proxy endpoints
+        const endpointMap = {
+            'query': 'prometheus-proxy/query',
+            'query_range': 'prometheus-proxy/query-range', 
+            'label/__name__/values': 'prometheus-proxy/metrics',
+            'targets': 'prometheus-proxy/targets',
+            'alerts': 'prometheus-proxy/alerts',
+            'status/buildinfo': 'prometheus-proxy/status/buildinfo',
+            'status/runtimeinfo': 'prometheus-proxy/status/runtimeinfo',
+            'status/flags': 'prometheus-proxy/status/flags',
+            'status/tsdb': 'prometheus-proxy/status/tsdb'
+        };
         
-        if (Object.keys(params).length > 0) {
+        const mappedEndpoint = endpointMap[endpoint] || `api/v1/${endpoint}`;
+        let url = `${API_BASE}/${mappedEndpoint}`;
+        
+        let method = 'GET';
+        let body = null;
+        
+        // Handle query endpoints specially
+        if (endpoint === 'query' && params.query) {
+            method = 'POST';
+            body = JSON.stringify({ query: params.query });
+            url = `${API_BASE}/prometheus-proxy/query`;
+        } else if (endpoint === 'query_range' && params.query) {
+            // Handle range queries
+            const searchParams = new URLSearchParams(params);
+            url = `${API_BASE}/api/v1/query_range?${searchParams.toString()}`;
+        } else if (Object.keys(params).length > 0 && method === 'GET') {
             const searchParams = new URLSearchParams(params);
             url += `?${searchParams.toString()}`;
         }
         
-        const response = await fetch(url);
+        const fetchOptions = {
+            method: method,
+            headers: {
+                'Accept': 'application/json'
+            }
+        };
+        
+        if (body) {
+            fetchOptions.headers['Content-Type'] = 'application/json';
+            fetchOptions.body = body;
+        }
+        
+        const response = await fetch(url, fetchOptions);
+        
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
         
         const data = await response.json();
         
-        if (data.status !== 'success') {
+        if (data.status && data.status !== 'success') {
             throw new Error(data.error || 'Unknown error from Prometheus');
         }
         
@@ -159,6 +201,31 @@ async function callPrometheusAPI(endpoint, params = {}) {
     } catch (error) {
         console.error(`Prometheus API call failed (${endpoint}):`, error);
         throw error;
+    }
+}
+
+// Fixed query execution
+async function executeQuery() {
+    const queryInput = document.getElementById('queryInput');
+    const query = queryInput.value.trim();
+    
+    if (!query) {
+        showToast('Warning', 'Please enter a query', 'warning');
+        return;
+    }
+    
+    showLoading('Executing query...');
+    
+    try {
+        const data = await callPrometheusAPI('query', { query: query });
+        displayQueryResults(data);
+        
+    } catch (error) {
+        console.error('Query execution failed:', error);
+        showToast('Error', `Query failed: ${error.message}`, 'error');
+        displayQueryError(error.message);
+    } finally {
+        hideLoading();
     }
 }
 
@@ -588,7 +655,37 @@ function displayTargets(targets) {
                 <p>No targets configured</p>
             </div>
         `;
+        return;async function executeGraph() {
+    const query = document.getElementById('graphQuery').value.trim();
+    if (!query) {
+        showToast('Warning', 'Please enter a query', 'warning');
         return;
+    }
+    
+    const timeRange = document.getElementById('timeRange').value;
+    const { start, end } = getTimeRange(timeRange);
+    
+    showLoading('Loading graph data...');
+    
+    try {
+        const params = {
+            query: query,
+            start: Math.floor(start / 1000),
+            end: Math.floor(end / 1000),
+            step: calculateStep(start, end)
+        };
+        
+        const data = await callPrometheusAPI('query_range', params);
+        displayGraphResults(data);
+        
+    } catch (error) {
+        console.error('Graph execution failed:', error);
+        showToast('Error', `Graph failed: ${error.message}`, 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
     }
     
     targetsList.innerHTML = targets.map(target => `
@@ -671,6 +768,7 @@ async function loadConfigFlags() {
         displayStatusError('configFlags', 'Failed to load configuration flags');
     }
 }
+
 
 async function loadTSDBStats() {
     try {

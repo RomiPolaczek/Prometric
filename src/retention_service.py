@@ -6,6 +6,8 @@ from typing import List, Optional, Dict, Any
 import logging
 import re
 import os
+from urllib.parse import urlencode
+import pytz
 
 from database import RetentionPolicy, ExecutionLog
 from models import RetentionPolicyCreate, RetentionPolicyUpdate, ExecutionResult
@@ -16,6 +18,19 @@ class RetentionService:
     def __init__(self):
         self.prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
         self.timeout = aiohttp.ClientTimeout(total=30)
+        # Set timezone to Israel/Jerusalem
+        self.timezone = pytz.timezone('Asia/Jerusalem')
+        
+    def _get_local_time(self) -> datetime:
+        """Get current time in Israel/Jerusalem timezone"""
+        return datetime.now(self.timezone)
+        
+    def _to_local_time(self, utc_datetime: datetime) -> datetime:
+        """Convert UTC datetime to Israel/Jerusalem timezone"""
+        if utc_datetime.tzinfo is None:
+            # Assume it's UTC if no timezone info
+            utc_datetime = pytz.utc.localize(utc_datetime)
+        return utc_datetime.astimezone(self.timezone)
 
     def create_policy(self, db: Session, policy: RetentionPolicyCreate) -> RetentionPolicy:
         """Create a new retention policy"""
@@ -70,7 +85,7 @@ class RetentionService:
         for field, value in policy_update.dict(exclude_unset=True).items():
             setattr(db_policy, field, value)
         
-        db_policy.updated_at = datetime.utcnow()
+        db_policy.updated_at = self._get_local_time()
         db.commit()
         db.refresh(db_policy)
         
@@ -142,7 +157,7 @@ class RetentionService:
             raise
 
     async def _delete_metric_data(self, metric_names: List[str], cutoff_timestamp: int) -> int:
-        """Delete old data for specified metrics"""
+        """Delete old data for specified metrics - deletes everything from start=0 to end=cutoff_timestamp"""
         if not metric_names:
             return 0
 
@@ -151,34 +166,44 @@ class RetentionService:
         try:
             async with aiohttp.ClientSession(timeout=self.timeout) as session:
                 for metric_name in metric_names:
-                    # Create deletion request for each metric
+                    # Build the delete URL with query parameters (like your curl example)
+                    match_selector = f'{metric_name}'  # Simple metric name match
+                    
+                    # Build query parameters like in your curl example
+                    params = {
+                        'match[]': match_selector,
+                        'start': '0',  # Always start from beginning (like your curl)
+                        'end': str(cutoff_timestamp)  # Delete up to this timestamp
+                    }
+                    
+                    # Build the URL with encoded parameters
                     delete_url = f"{self.prometheus_url}/api/v1/admin/tsdb/delete_series"
+                    query_string = urlencode(params, doseq=True)  # doseq=True handles match[] properly
+                    full_url = f"{delete_url}?{query_string}"
                     
-                    # FIXED: Use form data instead of URL parameters
-                    data = aiohttp.FormData()
-                    data.add_field('match[]', f'{{__name__="{metric_name}"}}')
-                    data.add_field('start', '0')
-                    data.add_field('end', str(cutoff_timestamp))
+                    logger.info(f"Deleting data for {metric_name} from 0 to {cutoff_timestamp}")
+                    logger.debug(f"DELETE URL: {full_url}")
                     
-                    logger.debug(f"Using match selector: {{__name__=\"{metric_name}\"}}")
-                    
-                    async with session.post(delete_url, data=data) as response:
+                    async with session.post(full_url) as response:
                         response_text = await response.text()
                         
                         if response.status == 204:  # Success (No Content)
                             total_deleted += 1
                             logger.info(f"Successfully deleted old data for metric: {metric_name}")
                         elif response.status == 400:
-                            try:
-                                response_json = await response.json()
-                                logger.warning(f"Bad request for metric {metric_name}: {response_json}")
-                            except:
-                                logger.warning(f"Bad request for metric {metric_name}: {response_text}")
+                            logger.warning(f"Bad request for metric {metric_name}: {response_text}")
+                        elif response.status == 422:
+                            logger.warning(f"Unprocessable entity for metric {metric_name} (may not exist): {response_text}")
                         else:
                             logger.error(f"Failed to delete data for metric {metric_name}: HTTP {response.status} - {response_text}")
                     
                     # Small delay between requests to avoid overwhelming Prometheus
                     await asyncio.sleep(0.1)
+
+                # After all deletions, clean tombstones
+                if total_deleted > 0:
+                    logger.info("Cleaning tombstones after deletions...")
+                    await self._clean_tombstones(session)
 
         except Exception as e:
             logger.error(f"Error during metric data deletion: {e}")
@@ -186,17 +211,31 @@ class RetentionService:
 
         return total_deleted
 
+    async def _clean_tombstones(self, session: aiohttp.ClientSession):
+        """Clean tombstones after deletion (like your second curl command)"""
+        try:
+            clean_url = f"{self.prometheus_url}/api/v1/admin/tsdb/clean_tombstones"
+            
+            async with session.post(clean_url) as response:
+                if response.status == 204:
+                    logger.info("Successfully cleaned tombstones")
+                else:
+                    response_text = await response.text()
+                    logger.warning(f"Failed to clean tombstones: HTTP {response.status} - {response_text}")
+                    
+        except Exception as e:
+            logger.error(f"Error cleaning tombstones: {e}")
+
     async def _validate_metric_selector(self, metric_name: str) -> bool:
         """Validate that the metric selector is properly formatted"""
         try:
-            # Test query to validate the selector format
-            selector = f'{{__name__="{metric_name}"}}'
+            # Test query to validate the selector format - using simple metric name
             query_url = f"{self.prometheus_url}/api/v1/query"
             
             async with aiohttp.ClientSession(timeout=self.timeout) as session:
                 params = {
-                    'query': f'count({selector})',
-                    'time': str(int(datetime.utcnow().timestamp()))
+                    'query': f'count({{{metric_name}}})',  # Simple metric name query
+                    'time': str(int(self._get_local_time().timestamp()))
                 }
                 
                 async with session.get(query_url, params=params) as response:
@@ -218,15 +257,18 @@ class RetentionService:
         if not policy.enabled:
             raise ValueError(f"Policy with ID {policy_id} is disabled")
 
-        execution_time = datetime.utcnow()
+        execution_time = self._get_local_time()  
         
         try:
-            # Calculate cutoff timestamp (Unix timestamp in milliseconds)
+            # Calculate cutoff timestamp using Israel/Jerusalem timezone
             cutoff_date = execution_time - timedelta(days=policy.retention_days)
-            cutoff_timestamp = int(cutoff_date.timestamp() * 1000)
+            cutoff_timestamp = int(cutoff_date.timestamp())  # Unix timestamp in seconds
             
             logger.info(f"Executing policy {policy_id}: {policy.metric_name_pattern} (retention: {policy.retention_days} days)")
-            logger.info(f"Cutoff date: {cutoff_date.isoformat()}, Cutoff timestamp: {cutoff_timestamp}")
+            logger.info(f"Current Israel time: {execution_time.isoformat()}")
+            logger.info(f"Cutoff date (Israel time): {cutoff_date.isoformat()}")
+            logger.info(f"Cutoff timestamp: {cutoff_timestamp}")
+            logger.info(f"This will delete all data from 0 to {cutoff_timestamp} (keeping data newer than {cutoff_date.isoformat()})")
             
             # Find matching metrics
             matching_metrics = await self._query_prometheus_metrics(policy.metric_name_pattern)
@@ -234,7 +276,7 @@ class RetentionService:
             if not matching_metrics:
                 logger.warning(f"No metrics found matching pattern: {policy.metric_name_pattern}")
             
-            # Delete old data
+            # Delete old data (everything from start=0 to end=cutoff_timestamp)
             series_deleted = await self._delete_metric_data(matching_metrics, cutoff_timestamp)
             
             # Update policy last_executed timestamp
@@ -264,7 +306,6 @@ class RetentionService:
             
             logger.info(f"Policy {policy_id} executed successfully: {series_deleted} series deleted from {len(matching_metrics)} metrics")
             return result
-            
         except Exception as e:
             logger.error(f"Error executing policy {policy_id}: {e}")
             
@@ -332,18 +373,22 @@ class RetentionService:
         try:
             # Find matching metrics
             matching_metrics = await self._query_prometheus_metrics(policy.metric_name_pattern)
-            
-            # Calculate what would be deleted
-            cutoff_date = datetime.utcnow() - timedelta(days=policy.retention_days)
+            current_time = self._get_local_time()
+            cutoff_date = current_time - timedelta(days=policy.retention_days)
+            cutoff_timestamp = int(cutoff_date.timestamp())
             
             return {
                 "policy_id": policy.id,
                 "metric_pattern": policy.metric_name_pattern,
                 "retention_days": policy.retention_days,
-                "cutoff_date": cutoff_date.isoformat(),
+                "current_israel_time": current_time.isoformat(),
+                "cutoff_date_israel_time": cutoff_date.isoformat(),
+                "cutoff_timestamp": cutoff_timestamp,
                 "matching_metrics": matching_metrics,
                 "metrics_count": len(matching_metrics),
-                "would_delete_data_older_than": cutoff_date.isoformat()
+                "would_delete_data_older_than": cutoff_date.isoformat(),
+                "deletion_range": f"start=0 to end={cutoff_timestamp}",
+                "timezone": "Asia/Jerusalem"
             }
             
         except Exception as e:
