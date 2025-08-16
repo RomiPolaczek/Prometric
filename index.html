@@ -6,7 +6,12 @@
     <title>Prometheus Management Console</title>
     <link rel="stylesheet" href="static/styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.30.0/date-fns.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
+    <link rel="icon" type="image/png" href="static/mini_logo.png">
+    <link rel="apple-touch-icon" href="static/mini_logo.png">
 </head>
 <body>
     <!-- Navigation -->
@@ -45,6 +50,9 @@
             <div class="nav-status" id="navStatus">
                 <span class="status-indicator" id="statusIndicator"></span>
                 <span id="statusText">Checking...</span>
+                <button class="btn btn-help" onclick="showKeyboardShortcuts()" title="Keyboard Shortcuts">
+                    <i class="fas fa-question-circle"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -129,6 +137,26 @@
                             <i class="fas fa-chart-line"></i>
                             Graph
                         </button>
+                        <button class="btn btn-secondary" onclick="clearGraph()">
+                            <i class="fas fa-eraser"></i>
+                            Clear
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportGraphData()" id="exportBtn" style="display: none;">
+                            <i class="fas fa-download"></i>
+                            Export
+                        </button>
+                        <div class="auto-refresh-controls">
+                            <label>
+                                <input type="checkbox" id="autoRefresh">
+                                Auto-refresh
+                            </label>
+                            <select id="refreshInterval">
+                                <option value="15">15s</option>
+                                <option value="30" selected>30s</option>
+                                <option value="60">1m</option>
+                                <option value="300">5m</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>

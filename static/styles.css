@@ -194,6 +194,12 @@ body {
     color: white;
 }
 
+/* Make graph query textbox wider */
+#graphQuery {
+    flex: 2; /* Takes up more space than the default flex: 1 */
+    min-width: 600px; /* Ensure minimum width */
+}
+
 #queryInput:focus, #graphQuery:focus {
     outline: none;
     border-color: var(--primary-color);
@@ -291,7 +297,11 @@ body {
 }
 
 .graph-query-section {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem; /* Increased margin */
+}
+
+.graph-query-section textarea {
+    margin-bottom: 1rem; /* Add space below the textarea */
 }
 
 .graph-time-controls {
@@ -1159,4 +1169,118 @@ body {
         background: var(--background);
         color: var(--text-primary);
     }
+}
+
+/* טקסט לבן בכל השדות בתוך המודל */
+#policyModal .form-group input,
+#policyModal .form-group textarea,
+#policyModal .form-group select {
+  color: #fff !important;        /* צבע טקסט */
+  caret-color: #fff !important;  /* צבע סמן */
+  background-color: #0f172a !important; /* רקע כהה לניגודיות */
+}
+
+/* placeholder בהיר */
+#policyModal .form-group input::placeholder,
+#policyModal .form-group textarea::placeholder {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+/* נגד autofill של כרום */
+#policyModal .form-group input:-webkit-autofill,
+#policyModal .form-group textarea:-webkit-autofill,
+#policyModal .form-group select:-webkit-autofill {
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+  transition: background-color 9999s ease-out 0s !important;
+}
+
+/* Metric Suggestions Autocomplete */
+.metric-suggestions {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+
+.suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.suggestion-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.suggestion-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Auto-refresh Controls */
+.auto-refresh-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    padding: 8px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+}
+
+.auto-refresh-controls label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.auto-refresh-controls input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.auto-refresh-controls select {
+    padding: 4px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Help Button */
+.btn-help {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 12px;
+}
+
+.btn-help:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
 }
