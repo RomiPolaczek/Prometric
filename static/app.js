@@ -144,6 +144,7 @@ function showCreateModal() {
     document.getElementById('policyForm').reset();
     document.getElementById('enabled').checked = true;
     showModal('policyModal');
+    enforceWhiteInputs();
 }
 
 function editPolicy(id) {

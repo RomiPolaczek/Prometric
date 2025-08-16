@@ -6,8 +6,19 @@ let confirmCallback = null;
 let metricsChart = null;
 let refreshInterval = null;
 
+// Metric suggestions and autocomplete
+let availableMetrics = [];
+let metricSuggestions = [];
+
 // API Configuration - Use direct Prometheus API calls
 const API_BASE = window.location.origin;
+
+// Log Chart.js status
+console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+if (typeof Chart !== 'undefined') {
+    console.log('Chart.js version:', Chart.version);
+    console.log('Chart.js adapters:', Chart.adapters);
+}
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -17,6 +28,16 @@ document.addEventListener('DOMContentLoaded', function() {
 async function initializeApplication() {
     setupEventListeners();
     await checkApiHealth();
+    
+    // Load available metrics for autocomplete
+    await loadAvailableMetrics();
+    setupMetricAutocomplete();
+    
+    // Add sample queries
+    addSampleQueries();
+    
+    // Setup graph auto-refresh
+    setupGraphAutoRefresh();
     
     // Initialize based on current tab
     switchTab('query');
@@ -139,6 +160,8 @@ async function checkApiHealth() {
 // Fixed API call function 
 async function callPrometheusAPI(endpoint, params = {}) {
     try {
+        console.log(`callPrometheusAPI called with endpoint: ${endpoint}, params:`, params);
+        
         // Map common endpoints to our direct proxy endpoints
         const endpointMap = {
             'query': 'prometheus-proxy/query',
@@ -149,7 +172,9 @@ async function callPrometheusAPI(endpoint, params = {}) {
             'status/buildinfo': 'prometheus-proxy/status/buildinfo',
             'status/runtimeinfo': 'prometheus-proxy/status/runtimeinfo',
             'status/flags': 'prometheus-proxy/status/flags',
-            'status/tsdb': 'prometheus-proxy/status/tsdb'
+            'status/tsdb': 'prometheus-proxy/status/tsdb',
+            'labels': 'prometheus-proxy/labels',
+            'series': 'prometheus-proxy/series'
         };
         
         const mappedEndpoint = endpointMap[endpoint] || `api/v1/${endpoint}`;
@@ -164,12 +189,21 @@ async function callPrometheusAPI(endpoint, params = {}) {
             body = JSON.stringify({ query: params.query });
             url = `${API_BASE}/prometheus-proxy/query`;
         } else if (endpoint === 'query_range' && params.query) {
-            // Handle range queries
-            const searchParams = new URLSearchParams(params);
-            url = `${API_BASE}/api/v1/query_range?${searchParams.toString()}`;
+            // Handle range queries - use GET with query parameters
+            const searchParams = new URLSearchParams();
+            if (params.query) searchParams.append('query', params.query);
+            if (params.start) searchParams.append('start', params.start);
+            if (params.end) searchParams.append('end', params.end);
+            if (params.step) searchParams.append('step', params.step);
+            url = `${API_BASE}/prometheus-proxy/query-range?${searchParams.toString()}`;
         } else if (Object.keys(params).length > 0 && method === 'GET') {
             const searchParams = new URLSearchParams(params);
             url += `?${searchParams.toString()}`;
+        }
+        
+        console.log(`Making ${method} request to: ${url}`);
+        if (body) {
+            console.log('Request body:', body);
         }
         
         const fetchOptions = {
@@ -185,13 +219,16 @@ async function callPrometheusAPI(endpoint, params = {}) {
         }
         
         const response = await fetch(url, fetchOptions);
+        console.log(`Response status: ${response.status}`);
         
         if (!response.ok) {
             const errorText = await response.text();
+            console.error('Response error:', errorText);
             throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
         
         const data = await response.json();
+        console.log('Response data:', data);
         
         if (data.status && data.status !== 'success') {
             throw new Error(data.error || 'Unknown error from Prometheus');
@@ -374,43 +411,146 @@ function initializeGraphTab() {
 function initializeChart() {
     const ctx = document.getElementById('metricsChart');
     if (ctx && typeof Chart !== 'undefined') {
-        metricsChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: []
+        // Destroy existing chart if it exists
+        if (metricsChart) {
+            metricsChart.destroy();
+        }
+        
+        // Check if zoom plugin is available
+        const hasZoomPlugin = typeof Chart.zoom !== 'undefined';
+        console.log('Chart.js zoom plugin available:', hasZoomPlugin);
+        
+        // Check if date adapter is available
+        const hasDateAdapter = typeof Chart.adapters !== 'undefined' && Chart.adapters.date;
+        console.log('Chart.js date adapter available:', hasDateAdapter);
+        
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        type: 'time',
+            scales: {
+                x: {
+                    type: 'time',
+                    display: true,
+                    title: {
                         display: true,
-                        title: {
-                            display: true,
-                            text: 'Time'
-                        }
+                        text: 'Time'
                     },
-                    y: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Value'
+                    time: {
+                        displayFormats: {
+                            millisecond: 'HH:mm:ss.SSS',
+                            second: 'HH:mm:ss',
+                            minute: 'HH:mm',
+                            hour: 'MMM DD HH:mm',
+                            day: 'MMM DD',
+                            week: 'MMM DD',
+                            month: 'MMM YYYY',
+                            quarter: 'MMM YYYY',
+                            year: 'YYYY'
                         }
                     }
                 },
-                plugins: {
-                    legend: {
+                y: {
+                    display: true,
+                    title: {
                         display: true,
-                        position: 'top'
+                        text: 'Value'
                     },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
+                    beginAtZero: false
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        title: function(context) {
+                            const date = new Date(context[0].parsed.x);
+                            return date.toLocaleString();
+                        }
                     }
                 }
             }
-        });
+        };
+        
+        // Add zoom plugin options only if available
+        if (hasZoomPlugin) {
+            chartOptions.plugins.zoom = {
+                pan: {
+                    enabled: true,
+                    mode: 'xy'
+                },
+                zoom: {
+                    wheel: {
+                        enabled: true
+                    },
+                    pinch: {
+                        enabled: true
+                    },
+                    mode: 'xy'
+                }
+            };
+        }
+        
+        // If no date adapter, fall back to linear scale
+        if (!hasDateAdapter) {
+            console.warn('Date adapter not available, using linear scale for x-axis');
+            chartOptions.scales.x.type = 'linear';
+            chartOptions.scales.x.title.text = 'Sample Index';
+            delete chartOptions.scales.x.time;
+            
+            // Update tooltip to show sample index instead of time
+            chartOptions.plugins.tooltip.callbacks.title = function(context) {
+                return `Sample ${context[0].parsed.x}`;
+            };
+        }
+        
+        try {
+            metricsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: []
+                },
+                options: chartOptions
+            });
+            
+            console.log('Chart initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize chart with time scale, trying linear scale:', error);
+            
+            // Fallback to simple linear scale
+            try {
+                chartOptions.scales.x.type = 'linear';
+                chartOptions.scales.x.title.text = 'Sample Index';
+                delete chartOptions.scales.x.time;
+                
+                metricsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: []
+                    },
+                    options: chartOptions
+                });
+                
+                console.log('Chart initialized with fallback linear scale');
+            } catch (fallbackError) {
+                console.error('Failed to initialize chart even with fallback:', fallbackError);
+                metricsChart = null;
+            }
+        }
+    } else {
+        console.error('Failed to initialize chart: Chart.js not available or canvas not found');
     }
 }
 
@@ -420,24 +560,41 @@ function handleTimeRangeChange() {
     
     if (timeRange.value === 'custom') {
         customInputs.style.display = 'flex';
+        
+        // Set default values for custom time range
+        const end = new Date();
+        const start = new Date(end.getTime() - (24 * 60 * 60 * 1000)); // 1 day ago
+        
+        const startInput = document.getElementById('startTime');
+        const endInput = document.getElementById('endTime');
+        
+        if (startInput && endInput) {
+            startInput.value = start.toISOString().slice(0, 16);
+            endInput.value = end.toISOString().slice(0, 16);
+        }
     } else {
         customInputs.style.display = 'none';
     }
 }
 
 async function executeGraph() {
+    console.log('executeGraph called');
     const query = document.getElementById('graphQuery').value.trim();
     if (!query) {
         showToast('Warning', 'Please enter a query', 'warning');
         return;
     }
     
+    console.log('Query:', query);
     const timeRange = document.getElementById('timeRange').value;
     const { start, end } = getTimeRange(timeRange);
+    
+    console.log('Time range:', { timeRange, start: new Date(start), end: new Date(end) });
     
     showLoading('Loading graph data...');
     
     try {
+        // First try range query
         const params = {
             query: query,
             start: Math.floor(start / 1000),
@@ -445,12 +602,42 @@ async function executeGraph() {
             step: calculateStep(start, end)
         };
         
-        const data = await callPrometheusAPI('query_range', params);
+        console.log('Query params:', params);
+        
+        let data;
+        try {
+            console.log('Attempting range query...');
+            data = await callPrometheusAPI('query_range', params);
+            console.log('Range query successful:', data);
+        } catch (rangeError) {
+            console.log('Range query failed, trying instant query:', rangeError);
+            // Fallback to instant query if range query fails
+            data = await callPrometheusAPI('query', { query: query });
+            console.log('Instant query successful:', data);
+        }
+        
+        console.log('Displaying graph results...');
         displayGraphResults(data);
         
     } catch (error) {
         console.error('Graph execution failed:', error);
         showToast('Error', `Graph failed: ${error.message}`, 'error');
+        
+        // Show error in graph area
+        const graphEmpty = document.getElementById('graphEmpty');
+        if (graphEmpty) {
+            graphEmpty.style.display = 'block';
+            graphEmpty.innerHTML = `
+                <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                <p>Failed to load graph: ${error.message}</p>
+            `;
+        }
+        
+        // Clear chart
+        if (metricsChart) {
+            metricsChart.data.datasets = [];
+            metricsChart.update();
+        }
     } finally {
         hideLoading();
     }
@@ -485,8 +672,13 @@ function getTimeRange(rangeValue) {
         case 'custom':
             const startInput = document.getElementById('startTime');
             const endInput = document.getElementById('endTime');
-            start = new Date(startInput.value).getTime();
-            end = new Date(endInput.value).getTime();
+            if (startInput.value && endInput.value) {
+                start = new Date(startInput.value).getTime();
+                end = new Date(endInput.value).getTime();
+            } else {
+                // Fallback to 1 day if custom inputs are empty
+                start = end - (24 * 60 * 60 * 1000);
+            }
             break;
         default:
             start = end - (24 * 60 * 60 * 1000);
@@ -497,15 +689,28 @@ function getTimeRange(rangeValue) {
 
 function calculateStep(start, end) {
     const duration = end - start;
-    const points = 200;
-    return Math.max(15, Math.floor(duration / (points * 1000)));
+    const points = 200; // Target number of data points
+    const step = Math.max(15, Math.floor(duration / (points * 1000)));
+    
+    // Round to common step values for better performance
+    const commonSteps = [15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400];
+    for (const commonStep of commonSteps) {
+        if (step <= commonStep) {
+            return commonStep;
+        }
+    }
+    return step;
 }
 
 function displayGraphResults(data) {
+    console.log('displayGraphResults called with:', data);
     const graphEmpty = document.getElementById('graphEmpty');
+    const exportBtn = document.getElementById('exportBtn');
     
     if (!data || !data.data || !data.data.result || data.data.result.length === 0) {
+        console.log('No data to display, showing empty state');
         graphEmpty.style.display = 'block';
+        if (exportBtn) exportBtn.style.display = 'none';
         if (metricsChart) {
             metricsChart.data.datasets = [];
             metricsChart.update();
@@ -513,26 +718,88 @@ function displayGraphResults(data) {
         return;
     }
     
+    console.log('Data available, hiding empty state');
     graphEmpty.style.display = 'none';
     
     if (metricsChart) {
+        console.log('Processing datasets...');
+        
+        // Check if we're using time scale
+        const isTimeScale = metricsChart.options.scales.x.type === 'time';
+        console.log('Using time scale:', isTimeScale);
+        
         const datasets = data.data.result.map((series, index) => {
             const color = getColorForIndex(index);
+            let dataPoints = [];
+            
+            // Handle both instant and range queries
+            if (series.values) {
+                // Range query data
+                console.log(`Processing range data for series ${index}:`, series.metric);
+                dataPoints = series.values.map(([timestamp, value]) => ({
+                    x: isTimeScale ? timestamp * 1000 : timestamp, // Use timestamp for time scale, raw value for linear
+                    y: parseFloat(value) || 0
+                }));
+            } else if (series.value) {
+                // Instant query data - create a single point
+                console.log(`Processing instant data for series ${index}:`, series.metric);
+                const timestamp = series.value[0];
+                const value = series.value[1];
+                dataPoints = [{
+                    x: isTimeScale ? timestamp * 1000 : timestamp, // Use timestamp for time scale, raw value for linear
+                    y: parseFloat(value) || 0
+                }];
+            }
+            
+            // Filter out invalid data points
+            dataPoints = dataPoints.filter(point => 
+                !isNaN(point.y) && isFinite(point.y) && point.y !== null
+            );
+            
+            console.log(`Series ${index} has ${dataPoints.length} valid data points`);
+            
             return {
                 label: formatMetricName(series.metric),
-                data: series.values.map(([timestamp, value]) => ({
-                    x: timestamp * 1000,
-                    y: parseFloat(value)
-                })),
+                data: dataPoints,
                 borderColor: color,
                 backgroundColor: color + '20',
                 fill: false,
-                tension: 0.1
+                tension: 0.1,
+                pointRadius: dataPoints.length === 1 ? 6 : 0, // Show points for single values
+                pointHoverRadius: 8,
+                borderWidth: 2
             };
-        });
+        }).filter(dataset => dataset.data.length > 0); // Remove empty datasets
         
+        console.log(`Total datasets to display: ${datasets.length}`);
+        
+        if (datasets.length === 0) {
+            console.log('No valid datasets, showing empty state');
+            graphEmpty.style.display = 'block';
+            graphEmpty.innerHTML = `
+                <i class="fas fa-chart-line"></i>
+                <p>No valid data points found for the query</p>
+            `;
+            if (exportBtn) exportBtn.style.display = 'none';
+            if (metricsChart) {
+                metricsChart.data.datasets = [];
+                metricsChart.update();
+            }
+            return;
+        }
+        
+        console.log('Updating chart with datasets');
         metricsChart.data.datasets = datasets;
         metricsChart.update();
+        
+        // Show export button when there's data
+        if (exportBtn) exportBtn.style.display = 'inline-block';
+        
+        // Show success message
+        showToast('Success', `Graph updated with ${datasets.length} series`, 'success');
+        console.log('Graph display completed successfully');
+    } else {
+        console.error('Chart not initialized, cannot display results');
     }
 }
 
@@ -897,6 +1164,7 @@ function showCreateModal() {
     document.getElementById('policyForm').reset();
     document.getElementById('enabled').checked = true;
     showModal('policyModal');
+    enforceWhiteInputs();
 }
 
 function editPolicy(id) {
@@ -1243,41 +1511,97 @@ function removeToast(toast) {
 }
 
 // Keyboard Shortcuts
-function handleKeyboardShortcuts(event) {
-    if (event.ctrlKey || event.metaKey) {
-        switch (event.key) {
-            case '1':
-                event.preventDefault();
-                switchTab('query');
-                break;
-            case '2':
-                event.preventDefault();
-                switchTab('graph');
-                break;
-            case '3':
-                event.preventDefault();
-                switchTab('alerts');
-                break;
-            case '4':
-                event.preventDefault();
-                switchTab('targets');
-                break;
-            case '5':
-                event.preventDefault();
-                switchTab('retention');
-                break;
-            case '6':
-                event.preventDefault();
-                switchTab('config');
-                break;
+function handleKeyboardShortcuts(e) {
+    // Global shortcuts
+    if (e.key === 'Escape') {
+        hideMetricSuggestions();
+        return;
+    }
+    
+    // Tab-specific shortcuts
+    switch (currentTab) {
+        case 'query':
+            handleQueryKeyboardShortcuts(e);
+            break;
+        case 'graph':
+            handleGraphKeyboardShortcuts(e);
+            break;
+    }
+}
+
+// Keyboard shortcuts for query tab
+function handleQueryKeyboardShortcuts(e) {
+    // Ctrl/Cmd + Enter to execute query
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        executeQuery();
+    }
+    
+    // Ctrl/Cmd + K to clear query
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        clearQuery();
+    }
+}
+
+// Keyboard shortcuts for graph tab
+function handleGraphKeyboardShortcuts(e) {
+    if (currentTab !== 'graph') return;
+    
+    // Ctrl/Cmd + Enter to execute graph
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        executeGraph();
+    }
+    
+    // Ctrl/Cmd + R to refresh graph
+    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        refreshGraph();
+    }
+    
+    // Ctrl/Cmd + E to export graph data
+    if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        exportGraphData();
+    }
+    
+    // Ctrl/Cmd + K to clear graph
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        clearGraph();
+    }
+}
+
+// Show keyboard shortcuts help
+function showKeyboardShortcuts() {
+    const shortcuts = {
+        'Query Tab': {
+            'Ctrl/Cmd + Enter': 'Execute query',
+            'Ctrl/Cmd + K': 'Clear query'
+        },
+        'Graph Tab': {
+            'Ctrl/Cmd + Enter': 'Execute graph',
+            'Ctrl/Cmd + R': 'Refresh graph',
+            'Ctrl/Cmd + E': 'Export data',
+            'Ctrl/Cmd + K': 'Clear graph'
+        },
+        'Global': {
+            'Escape': 'Close suggestions/modals'
+        }
+    };
+    
+    let helpText = '<h3>Keyboard Shortcuts</h3>';
+    for (const [section, sectionShortcuts] of Object.entries(shortcuts)) {
+        helpText += `<h4>${section}</h4>`;
+        for (const [key, description] of Object.entries(sectionShortcuts)) {
+            helpText += `<div class="shortcut-item"><kbd>${key}</kbd> <span>${description}</span></div>`;
         }
     }
     
-    // Close modals with Escape
-    if (event.key === 'Escape') {
-        closePolicyModal();
-        closeConfirmModal();
-    }
+    showToast('Info', 'Check the console for keyboard shortcuts', 'info');
+    console.log('%cKeyboard Shortcuts:', 'font-size: 16px; font-weight: bold; color: #3b82f6;');
+    console.table(shortcuts);
 }
 
 // Utility Functions
@@ -1365,3 +1689,265 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+function enforceWhiteInputs() {
+    const els = document.querySelectorAll('#policyModal input, #policyModal textarea, #policyModal select');
+    els.forEach(el => {
+      el.style.color = '#fff';
+      el.style.caretColor = '#fff';
+      if (el.tagName !== 'SELECT') el.style.backgroundColor = '#0f172a';
+      // גם נגד Autofill של כרום:
+      el.style.webkitTextFillColor = '#fff';
+    });
+  }
+  
+
+// Metric suggestions and autocomplete
+async function loadAvailableMetrics() {
+    try {
+        const data = await callPrometheusAPI('label/__name__/values');
+        if (data.data) {
+            availableMetrics = data.data;
+            console.log(`Loaded ${availableMetrics.length} available metrics`);
+        }
+    } catch (error) {
+        console.error('Failed to load available metrics:', error);
+    }
+}
+
+function setupMetricAutocomplete() {
+    const queryInputs = ['queryInput', 'graphQuery'];
+    
+    queryInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('input', function() {
+                const query = this.value;
+                if (query.length > 2) {
+                    showMetricSuggestions(query, this);
+                } else {
+                    hideMetricSuggestions();
+                }
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    navigateSuggestions(e.key === 'ArrowDown' ? 1 : -1);
+                } else if (e.key === 'Enter' && metricSuggestions.length > 0) {
+                    e.preventDefault();
+                    selectMetricSuggestion();
+                } else if (e.key === 'Escape') {
+                    hideMetricSuggestions();
+                }
+            });
+        }
+    });
+}
+
+function showMetricSuggestions(query, inputElement) {
+    const suggestions = availableMetrics.filter(metric => 
+        metric.toLowerCase().includes(query.toLowerCase())
+    ).slice(0, 10);
+    
+    metricSuggestions = suggestions;
+    
+    let suggestionsContainer = document.getElementById('metricSuggestions');
+    if (!suggestionsContainer) {
+        suggestionsContainer = document.createElement('div');
+        suggestionsContainer.id = 'metricSuggestions';
+        suggestionsContainer.className = 'metric-suggestions';
+        document.body.appendChild(suggestionsContainer);
+    }
+    
+    if (suggestions.length === 0) {
+        hideMetricSuggestions();
+        return;
+    }
+    
+    const rect = inputElement.getBoundingClientRect();
+    suggestionsContainer.style.position = 'absolute';
+    suggestionsContainer.style.top = `${rect.bottom + window.scrollY}px`;
+    suggestionsContainer.style.left = `${rect.left + window.scrollX}px`;
+    suggestionsContainer.style.width = `${rect.width}px`;
+    suggestionsContainer.style.zIndex = '1000';
+    
+    suggestionsContainer.innerHTML = suggestions.map((metric, index) => `
+        <div class="suggestion-item ${index === 0 ? 'selected' : ''}" data-index="${index}">
+            ${metric}
+        </div>
+    `).join('');
+    
+    suggestionsContainer.style.display = 'block';
+    
+    // Add click handlers
+    suggestionsContainer.querySelectorAll('.suggestion-item').forEach((item, index) => {
+        item.addEventListener('click', () => {
+            inputElement.value = item.textContent.trim();
+            hideMetricSuggestions();
+            inputElement.focus();
+        });
+    });
+}
+
+function hideMetricSuggestions() {
+    const suggestionsContainer = document.getElementById('metricSuggestions');
+    if (suggestionsContainer) {
+        suggestionsContainer.style.display = 'none';
+    }
+    metricSuggestions = [];
+}
+
+function navigateSuggestions(direction) {
+    const suggestionsContainer = document.getElementById('metricSuggestions');
+    if (!suggestionsContainer) return;
+    
+    const currentSelected = suggestionsContainer.querySelector('.suggestion-item.selected');
+    const items = suggestionsContainer.querySelectorAll('.suggestion-item');
+    
+    if (items.length === 0) return;
+    
+    let newIndex = 0;
+    if (currentSelected) {
+        const currentIndex = parseInt(currentSelected.dataset.index);
+        newIndex = (currentIndex + direction + items.length) % items.length;
+        currentSelected.classList.remove('selected');
+    }
+    
+    items[newIndex].classList.add('selected');
+}
+
+function selectMetricSuggestion() {
+    const suggestionsContainer = document.getElementById('metricSuggestions');
+    if (!suggestionsContainer) return;
+    
+    const selected = suggestionsContainer.querySelector('.suggestion-item.selected');
+    if (selected) {
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.id === 'queryInput' || activeElement.id === 'graphQuery')) {
+            activeElement.value = selected.textContent.trim();
+            hideMetricSuggestions();
+        }
+    }
+}
+  
+
+// Add sample queries for testing
+function addSampleQueries() {
+    const sampleQueries = [
+        'up',
+        'rate(http_requests_total[5m])',
+        'node_cpu_seconds_total',
+        'prometheus_tsdb_head_samples_appended_total',
+        'go_goroutines',
+        'process_cpu_seconds_total'
+    ];
+    
+    // Add sample queries to both query inputs
+    const queryInput = document.getElementById('queryInput');
+    const graphQuery = document.getElementById('graphQuery');
+    
+    if (queryInput && !queryInput.placeholder.includes('up')) {
+        queryInput.placeholder = 'Enter your PromQL query here...\n\nSample queries:\n' + sampleQueries.join('\n');
+    }
+    
+    if (graphQuery && !graphQuery.placeholder.includes('up')) {
+        graphQuery.placeholder = 'Enter PromQL query for graphing...\n\nSample queries:\n' + sampleQueries.join('\n');
+    }
+}
+
+// Refresh graph data
+function refreshGraph() {
+    const query = document.getElementById('graphQuery').value.trim();
+    if (query) {
+        executeGraph();
+    }
+}
+
+// Auto-refresh functionality
+function setupGraphAutoRefresh() {
+    const autoRefreshCheckbox = document.getElementById('autoRefresh');
+    if (autoRefreshCheckbox) {
+        autoRefreshCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                const interval = parseInt(document.getElementById('refreshInterval').value) || 30;
+                refreshInterval = setInterval(refreshGraph, interval * 1000);
+                showToast('Info', `Auto-refresh enabled (${interval}s)`, 'info');
+            } else {
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                    refreshInterval = null;
+                    showToast('Info', 'Auto-refresh disabled', 'info');
+                }
+            }
+        });
+    }
+}
+  
+
+// Export graph data
+function exportGraphData() {
+    if (!metricsChart || !metricsChart.data || metricsChart.data.datasets.length === 0) {
+        showToast('Warning', 'No graph data to export', 'warning');
+        return;
+    }
+    
+    const data = {
+        query: document.getElementById('graphQuery').value,
+        timeRange: document.getElementById('timeRange').value,
+        timestamp: new Date().toISOString(),
+        series: metricsChart.data.datasets.map(dataset => ({
+            label: dataset.label,
+            data: dataset.data.map(point => ({
+                timestamp: new Date(point.x).toISOString(),
+                value: point.y
+            }))
+        }))
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prometheus-graph-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('Success', 'Graph data exported successfully', 'success');
+}
+
+// Clear graph
+function clearGraph() {
+    if (metricsChart) {
+        metricsChart.data.datasets = [];
+        metricsChart.update();
+    }
+    
+    document.getElementById('graphQuery').value = '';
+    document.getElementById('timeRange').value = '1d';
+    handleTimeRangeChange();
+    
+    const graphEmpty = document.getElementById('graphEmpty');
+    if (graphEmpty) {
+        graphEmpty.style.display = 'block';
+        graphEmpty.innerHTML = `
+            <i class="fas fa-chart-line"></i>
+            <p>Enter a query and click Graph to visualize metrics</p>
+        `;
+    }
+    
+    // Stop auto-refresh if active
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+        const autoRefreshCheckbox = document.getElementById('autoRefresh');
+        if (autoRefreshCheckbox) {
+            autoRefreshCheckbox.checked = false;
+        }
+    }
+    
+    showToast('Info', 'Graph cleared', 'info');
+}
+  

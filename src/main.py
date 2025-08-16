@@ -519,6 +519,167 @@ async def get_metrics_summary():
             "error": str(e)
         }
 
+@app.post("/prometheus-proxy/query-range")
+async def prometheus_query_range_direct(request: Dict[str, Any]):
+    """Execute a PromQL range query for graphing - Direct JSON endpoint"""
+    query = request.get("query", "").strip()
+    start = request.get("start")
+    end = request.get("end")
+    step = request.get("step", "15")
+    
+    if not query:
+        raise HTTPException(status_code=400, detail="Query is required")
+    if start is None or end is None:
+        raise HTTPException(status_code=400, detail="Start and end timestamps are required")
+    
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                f"{prometheus_url}/api/v1/query_range",
+                params={
+                    "query": query,
+                    "start": start,
+                    "end": end,
+                    "step": step
+                }
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            json_data = response.json()
+            return json_data
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Query timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        logger.error(f"Query range error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/prometheus-proxy/query-range")
+async def prometheus_query_range_get(
+    query: str,
+    start: str,
+    end: str,
+    step: str = "15"
+):
+    """Execute a PromQL range query for graphing - GET endpoint"""
+    if not query:
+        raise HTTPException(status_code=400, detail="Query is required")
+    
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                f"{prometheus_url}/api/v1/query_range",
+                params={
+                    "query": query,
+                    "start": start,
+                    "end": end,
+                    "step": step
+                }
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            json_data = response.json()
+            return json_data
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Query timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        logger.error(f"Query range error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/prometheus-proxy/labels")
+async def get_prometheus_labels():
+    """Get available labels from Prometheus"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(f"{prometheus_url}/api/v1/labels")
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            json_data = response.json()
+            return json_data
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Request timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        logger.error(f"Labels error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/prometheus-proxy/label/{label_name}/values")
+async def get_prometheus_label_values(label_name: str):
+    """Get values for a specific label from Prometheus"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(f"{prometheus_url}/api/v1/label/{label_name}/values")
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            json_data = response.json()
+            return json_data
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Request timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        logger.error(f"Label values error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/prometheus-proxy/series")
+async def get_prometheus_series(
+    match: str = None,
+    start: str = None,
+    end: str = None
+):
+    """Get series from Prometheus with optional filtering"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        params = {}
+        if match:
+            params['match[]'] = match
+        if start:
+            params['start'] = start
+        if end:
+            params['end'] = end
+            
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(f"{prometheus_url}/api/v1/series", params=params)
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
+            json_data = response.json()
+            return json_data
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Request timed out")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
+    except Exception as e:
+        logger.error(f"Series error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     # Update requirements.txt to include httpx and psutil
     logger.info("Starting Prometheus Management Console on http://0.0.0.0:8000")
