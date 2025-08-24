@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Menu, Wifi, WifiOff } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { systemApi } from '@/lib/api'
@@ -62,6 +63,9 @@ export function Header({ activeTab, onMenuClick }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* Connection Status */}
           <Badge 
             variant={isConnected ? 'default' : 'destructive'}
@@ -76,13 +80,13 @@ export function Header({ activeTab, onMenuClick }: HeaderProps) {
           </Badge>
 
           {/* System Status */}
-          {health?.system && (
+          {/* {health?.system && (
             <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
               <span>CPU: {health.system.cpu_percent?.toFixed(1)}%</span>
               <span>•</span>
               <span>RAM: {health.system.memory_percent?.toFixed(1)}%</span>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </header>

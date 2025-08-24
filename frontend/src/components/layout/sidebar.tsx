@@ -3,6 +3,9 @@
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { useTheme } from 'next-themes'
+import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import {
   Search,
   TrendingUp,
@@ -10,7 +13,6 @@ import {
   Target,
   Database,
   Settings,
-  Flame,
   X
 } from 'lucide-react'
 
@@ -65,19 +67,37 @@ function SidebarContent({ activeTab, setActiveTab, onClose }: {
   setActiveTab: (tab: string) => void
   onClose?: () => void
 }) {
+  const { theme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  
+  // Ensure component is mounted before showing theme-dependent content
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  // Use dark theme logo as default until theme is resolved
+  const logoSrc = mounted && resolvedTheme === 'light' 
+    ? '/prometric-logo.png' 
+    : '/prometric-logo-darktheme.png'
+
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b">
-        <div className="flex items-center gap-2">
-          <Flame className="h-8 w-8 text-orange-500" />
-          <div>
-            <h1 className="text-xl font-bold">Prometric</h1>
-            <p className="text-xs text-muted-foreground">Prometheus Console</p>
+      {/* Header with Large Logo */}
+      <div className="relative p-6 border-b">
+        <div className="flex items-center justify-center">
+          <div className="relative w-60 h-20">
+            <Image
+              src={logoSrc}
+              alt="Prometric Logo"
+              fill
+              className="object-contain"
+              priority
+              key={logoSrc} // Force re-render when logo changes
+            />
           </div>
         </div>
         {onClose && (
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onClose} className="absolute top-4 right-4">
             <X className="h-4 w-4" />
           </Button>
         )}
@@ -116,7 +136,7 @@ function SidebarContent({ activeTab, setActiveTab, onClose }: {
 
       {/* Footer */}
       <div className="p-4 border-t">
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-muted-foreground text-center">
           <div>Prometheus Management Console</div>
           <div>Version 2.0.0</div>
         </div>
@@ -129,13 +149,13 @@ export function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen }: SidebarP
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:flex-col lg:w-80 lg:border-r lg:bg-card">
+      <div className="hidden lg:flex lg:flex-col lg:w-80 lg:border-r lg:bg-card dark:bg-black">
         <SidebarContent activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
       {/* Mobile Sidebar */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent side="left" className="w-80 p-0">
+        <SheetContent side="left" className="w-80 p-0 dark:bg-black">
           <SidebarContent 
             activeTab={activeTab} 
             setActiveTab={setActiveTab}
