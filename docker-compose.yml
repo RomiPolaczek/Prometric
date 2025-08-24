@@ -1,4 +1,22 @@
 services:
+  # Next.js UI Frontend
+  prometheus-ui:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://prometheus-retention-api:8000
+      - NODE_ENV=production
+    depends_on:
+      - prometheus-retention-api
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
   prometheus-retention-api:
     build: .
     ports:
