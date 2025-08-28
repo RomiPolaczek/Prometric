@@ -5,10 +5,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "8000:8000"
     environment:
       - NEXT_PUBLIC_API_URL=http://prometheus-retention-api:8000
       - NODE_ENV=production
+      - PORT=8000
     depends_on:
       - prometheus-retention-api
     restart: unless-stopped
@@ -20,7 +21,7 @@ services:
   prometheus-retention-api:
     build: .
     ports:
-      - "8000:8000"
+      - "8001:8000"
     environment:
       - PROMETHEUS_URL=http://prometheus:9090
       - DATABASE_URL=sqlite:///./data/prometheus_retention.db

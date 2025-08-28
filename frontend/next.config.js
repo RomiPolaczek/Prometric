@@ -7,10 +7,20 @@ const nextConfig = {
   output: 'standalone',
   
   async rewrites() {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://prometheus-retention-api:8000';
+    
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/:path*`,
+        destination: `${backendUrl}/:path*`,
+      },
+      {
+        source: '/prometheus-proxy/:path*',
+        destination: `${backendUrl}/prometheus-proxy/:path*`,
+      },
+      {
+        source: '/health',
+        destination: `${backendUrl}/health`,
       },
     ]
   },

@@ -40,8 +40,8 @@ app.add_middleware(
 )
 
 # Mount static files (CSS, JS, images)
-if os.path.exists("static"):
-    app.mount("/static", StaticFiles(directory="static"), name="static")
+# if os.path.exists("static"):
+#     app.mount("/static", StaticFiles(directory="static"), name="static")
 
 retention_service = RetentionService()
 
@@ -52,48 +52,48 @@ async def startup_event():
     start_scheduler(retention_service)
     logger.info("Background scheduler started successfully")
 
-@app.get("/", response_class=HTMLResponse)
-async def serve_ui():
-    """Serve the unified web UI"""
-    try:
-        with open("index.html", "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
-    except FileNotFoundError:
-        return HTMLResponse(content="""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Prometheus Management Console</title>
-            <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; 
-                       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-                .container { max-width: 600px; margin: 0 auto; }
-                .logo { font-size: 4rem; margin-bottom: 1rem; }
-                .api-link { background: rgba(255,255,255,0.2); color: white; padding: 1rem 2rem; 
-                           text-decoration: none; border-radius: 0.5rem; display: inline-block; margin: 0.5rem;
-                           border: 1px solid rgba(255,255,255,0.3); transition: all 0.3s; }
-                .api-link:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="logo">🔥</div>
-                <h1>Prometheus Management Console</h1>
-                <p>Unified interface for Prometheus monitoring and retention management</p>
-                
-                <h2>Available Endpoints:</h2>
-                <div>
-                    <a href="/docs" class="api-link">📖 API Documentation</a>
-                    <a href="/health" class="api-link">❤️ Health Check</a>
-                    <a href="/retention-policies" class="api-link">📋 Retention Policies</a>
-                    <a href="/debug/metrics-sample" class="api-link">🔍 Debug Metrics</a>
-                </div>
-                
-                <p><small>To use the full web UI, place the HTML, CSS, and JS files in the application directory.</small></p>
-            </div>
-        </body>
-        </html>
-        """)
+# @app.get("/", response_class=HTMLResponse)
+# async def serve_ui():
+#     """Serve the unified web UI"""
+#     try:
+#         with open("index.html", "r", encoding="utf-8") as f:
+#             return HTMLResponse(content=f.read())
+#     except FileNotFoundError:
+#         return HTMLResponse(content="""
+#         <!DOCTYPE html>
+#         <html>
+#         <head>
+#             <title>Prometheus Management Console</title>
+#             <style>
+#                 body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; 
+#                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+#                 .container { max-width: 600px; margin: 0 auto; }
+#                 .logo { font-size: 4rem; margin-bottom: 1rem; }
+#                 .api-link { background: rgba(255,255,255,0.2); color: white; padding: 1rem 2rem; 
+#                            text-decoration: none; border-radius: 0.5rem; display: inline-block; margin: 0.5rem;
+#                            border: 1px solid rgba(255,255,255,0.3); transition: all 0.3s; }
+#                 .api-link:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+#             </style>
+#         </head>
+#         <body>
+#             <div class="container">
+#                 <div class="logo">🔥</div>
+#                 <h1>Prometheus Management Console</h1>
+#                 <p>Unified interface for Prometheus monitoring and retention management</p>
+#                 
+#                 <h2>Available Endpoints:</h2>
+#                 <div>
+#                     <a href="/docs" class="api-link">📖 API Documentation</a>
+#                     <a href="/health" class="api-link">❤️ Health Check</a>
+#                     <a href="/retention-policies" class="api-link">📋 Retention Policies</a>
+#                     <a href="/debug/metrics-sample" class="api-link">🔍 Debug Metrics</a>
+#                 </div>
+#                 
+#                 <p><small>To use the full web UI, place the HTML, CSS, and JS files in the application directory.</small></p>
+#             </div>
+#         </body>
+#         </html>
+#         """)
 
 # FIXED: Prometheus Proxy Endpoints with proper streaming response
 @app.get("/api/v1/{path:path}")
