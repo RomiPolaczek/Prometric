@@ -74,3 +74,30 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom scrollbar styles for chat messages */
+.chat-messages-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-messages-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages-container::-webkit-scrollbar-thumb {
+  background: rgb(209 213 219);
+  border-radius: 4px;
+}
+
+.chat-messages-container::-webkit-scrollbar-thumb:hover {
+  background: rgb(156 163 175);
+}
+
+/* Dark mode scrollbar */
+.dark .chat-messages-container::-webkit-scrollbar-thumb {
+  background: rgb(75 85 99);
+}
+
+.dark .chat-messages-container::-webkit-scrollbar-thumb:hover {
+  background: rgb(107 114 128);
+}

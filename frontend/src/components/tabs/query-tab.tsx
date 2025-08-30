@@ -8,13 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Play, Trash2, Copy, AlertCircle } from 'lucide-react'
+import { Loader2, Play, Trash2, Copy, AlertCircle, Bot, Sparkles } from 'lucide-react'
 import { prometheusApi } from '@/lib/api'
 import { toast } from 'sonner'
+import { AIChat } from '@/components/ai-chat'
 
 export function QueryTab() {
   const [query, setQuery] = useState('')
   const [queryResults, setQueryResults] = useState<any>(null)
+  const [isAIMode, setIsAIMode] = useState(false)
 
   const queryMutation = useMutation({
     mutationFn: (query: string) => prometheusApi.query(query),
@@ -55,6 +57,11 @@ export function QueryTab() {
     toast.success('Query copied to clipboard')
   }
 
+  const handleAIQueryGenerated = (generatedQuery: string) => {
+    setQuery(generatedQuery)
+    setIsAIMode(false) // Switch back to PromQL mode
+  }
+
   const exampleQueries = [
     'up',
     'prometheus_tsdb_head_samples_appended_total',
@@ -68,56 +75,85 @@ export function QueryTab() {
       {/* Query Input */}
       <Card>
         <CardHeader>
-          <CardTitle>PromQL Query</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>Query Input</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.preventDefault()
+                setIsAIMode(!isAIMode)
+              }}
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 hover:from-blue-600 hover:to-purple-600"
+            >
+              {isAIMode ? (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Back to PromQL
+                </>
+              ) : (
+                <>
+                  <Bot className="h-4 w-4" />
+                  AI Assistant
+                </>
+              )}
+            </Button>
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Textarea
-              placeholder="Enter your PromQL query here..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              rows={4}
-              className="font-mono"
-            />
-            <div className="flex items-center gap-2">
-              <Button 
-                onClick={handleExecute}
-                disabled={queryMutation.isPending}
-              >
-                {queryMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Play className="h-4 w-4 mr-2" />
-                )}
-                Execute
-              </Button>
-              <Button variant="outline" onClick={handleClear}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Clear
-              </Button>
-              <Button variant="outline" onClick={handleCopyQuery}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy
-              </Button>
-            </div>
-          </div>
+        <CardContent className="space-y-4 transition-all duration-300 ease-in-out min-h-[200px]">
+          {isAIMode ? (
+            <AIChat onQueryGenerated={handleAIQueryGenerated} />
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Textarea
+                  placeholder="Enter your PromQL query here..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  rows={4}
+                  className="font-mono"
+                />
+                <div className="flex items-center gap-2">
+                  <Button 
+                    onClick={handleExecute}
+                    disabled={queryMutation.isPending}
+                  >
+                    {queryMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Play className="h-4 w-4 mr-2" />
+                    )}
+                    Execute
+                  </Button>
+                  <Button variant="outline" onClick={handleClear}>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Clear
+                  </Button>
+                  <Button variant="outline" onClick={handleCopyQuery}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy
+                  </Button>
+                </div>
+              </div>
 
-          {/* Example Queries */}
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Example queries:</div>
-            <div className="flex flex-wrap gap-2">
-              {exampleQueries.map((example) => (
-                <Badge
-                  key={example}
-                  variant="secondary"
-                  className="cursor-pointer hover:bg-secondary/80"
-                  onClick={() => setQuery(example)}
-                >
-                  {example}
-                </Badge>
-              ))}
-            </div>
-          </div>
+              {/* Example Queries */}
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Example queries:</div>
+                <div className="flex flex-wrap gap-2">
+                  {exampleQueries.map((example) => (
+                    <Badge
+                      key={example}
+                      variant="secondary"
+                      className="cursor-pointer hover:bg-secondary/80"
+                      onClick={() => setQuery(example)}
+                    >
+                      {example}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 

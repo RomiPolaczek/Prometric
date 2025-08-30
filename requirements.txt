@@ -9,3 +9,4 @@ pytz  # For timezone support
 python-multipart
 httpx
 psutil
+openai
