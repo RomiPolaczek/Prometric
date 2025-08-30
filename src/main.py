@@ -16,6 +16,7 @@ from models import RetentionPolicyCreate, RetentionPolicyResponse, RetentionPoli
 from retention_service import RetentionService
 from scheduler import start_scheduler
 from logger import setup_logger
+from ai_service import AIService
 import database
 
 # Set up logging
@@ -44,6 +45,7 @@ app.add_middleware(
 #     app.mount("/static", StaticFiles(directory="static"), name="static")
 
 retention_service = RetentionService()
+ai_service = AIService()
 
 @app.on_event("startup")
 async def startup_event():
@@ -679,6 +681,64 @@ async def get_prometheus_series(
     except Exception as e:
         logger.error(f"Series error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# AI Chatbot Endpoints
+@app.post("/ai/translate")
+async def translate_to_promql(request: Dict[str, Any]):
+    """Translate natural language to PromQL using AI"""
+    try:
+        natural_query = request.get("query", "").strip()
+        if not natural_query:
+            raise HTTPException(status_code=400, detail="Query is required")
+        
+        # Get available metrics for context
+        metrics_response = await get_prometheus_metrics_direct()
+        available_metrics = metrics_response.get("data", [])
+        
+        # Translate using AI
+        result = ai_service.translate_to_promql(natural_query, available_metrics)
+        
+        if result["success"]:
+            return {
+                "success": True,
+                "promql": result["promql"],
+                "explanation": result["explanation"],
+                "metric_used": result["metric_used"]
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"AI translation error: {e}")
+        raise HTTPException(status_code=500, detail=f"AI translation failed: {str(e)}")
+
+@app.post("/ai/suggestions")
+async def get_ai_suggestions(request: Dict[str, Any]):
+    """Get AI-powered query suggestions"""
+    try:
+        context = request.get("context", "").strip()
+        result = ai_service.get_query_suggestions(context)
+        
+        if result["success"]:
+            return result
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"AI suggestions error: {e}")
+        raise HTTPException(status_code=500, detail=f"AI suggestions failed: {str(e)}")
+
+@app.get("/ai/status")
+async def get_ai_status():
+    """Check AI service status"""
+    return {
+        "available": ai_service.is_available(),
+        "configured": ai_service.api_key is not None
+    }
 
 if __name__ == "__main__":
     # Update requirements.txt to include httpx and psutil

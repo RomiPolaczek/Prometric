@@ -147,4 +147,39 @@ export const systemApi = {
   }
 }
 
+// AI Chatbot API
+export const aiApi = {
+  translateToPromql: async (query: string): Promise<{
+    success: boolean
+    promql?: string
+    explanation?: string
+    metric_used?: string
+    error?: string
+  }> => {
+    const response = await api.post('/ai/translate', { query })
+    return response.data
+  },
+
+  getSuggestions: async (context?: string): Promise<{
+    success: boolean
+    suggestions?: Array<{
+      query: string
+      description: string
+      category: string
+    }>
+    error?: string
+  }> => {
+    const response = await api.post('/ai/suggestions', { context })
+    return response.data
+  },
+
+  getStatus: async (): Promise<{
+    available: boolean
+    configured: boolean
+  }> => {
+    const response = await api.get('/ai/status')
+    return response.data
+  }
+}
+
 export default api
