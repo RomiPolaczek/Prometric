@@ -1,6 +1,6 @@
 # AI Chatbot Integration Setup
 
-This project now includes an AI-powered chatbot that can translate natural language questions into PromQL queries using OpenAI's GPT models.
+This project includes an AI-powered chatbot that can translate natural language questions into PromQL queries using OpenAI's GPT models.
 
 ## Features
 

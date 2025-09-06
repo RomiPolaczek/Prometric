@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=http://localhost:8001
       - NODE_ENV=production
       - PORT=8000
     depends_on:
@@ -18,9 +18,11 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+        
   prometheus-retention-api:
     build: .
-    ports: []  # No external port - only accessible from frontend
+    ports: 
+      - "8001:8000"  # Expose API on port 8001
     environment:
       - PROMETHEUS_URL=http://prometheus:9090
       - DATABASE_URL=sqlite:///./data/prometheus_retention.db

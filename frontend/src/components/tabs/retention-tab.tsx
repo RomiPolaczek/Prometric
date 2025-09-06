@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from '@/components/ui/badge'
 import { 
   Table, 
@@ -245,44 +246,50 @@ export function RetentionTab() {
                           'Never'
                         )}
                       </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => executePolicyMutation.mutate(policy.id)}
-                              disabled={!policy.enabled || executePolicyMutation.isPending}
-                            >
-                              <Play className="h-4 w-4 mr-2" />
-                              Execute
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => dryRunMutation.mutate(policy.id)}
-                              disabled={dryRunMutation.isPending}
-                            >
-                              <TestTube className="h-4 w-4 mr-2" />
-                              Dry Run
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setEditingPolicy(policy)}
-                            >
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => deletePolicyMutation.mutate(policy.id)}
-                              disabled={deletePolicyMutation.isPending}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                      <TableCell className="flex gap-0.75">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" onClick={() => executePolicyMutation.mutate(policy.id)}>
+                                <Play className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Execute</TooltipContent>
+                          </Tooltip>
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" onClick={() => dryRunMutation.mutate(policy.id)}>
+                                <TestTube className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Dry Run</TooltipContent>
+                          </Tooltip>
+
+                        {/* Edit */}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" onClick={() => setEditingPolicy(policy)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-black text-white z-[9999]">Edit</TooltipContent>
+                          </Tooltip>
+
+                        {/* Delete */}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => deletePolicyMutation.mutate(policy.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </TableCell>
                     </TableRow>
                   ))}
