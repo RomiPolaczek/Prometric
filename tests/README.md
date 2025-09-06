@@ -27,14 +27,14 @@ python3 tests/test_metric_analysis.py --pattern "prometheus"
 python3 tests/test_metric_analysis.py --metric "probe_http_ssl"
 
 # Use custom API port
-python3 tests/test_metric_analysis.py --api-port 8001
+python3 tests/test_metric_analysis.py --api-port 8000
 ```
 
 #### Command Line Options
 
 - `--pattern, -p`: Filter metrics by name pattern (e.g., "cpu", "memory", "probe")
 - `--metric, -m`: Analyze a specific metric name in detail
-- `--api-port`: Specify the backend API port (default: 8001)
+- `--api-port`: Specify the backend API port (default: 8000)
 
 #### What It Analyzes
 
@@ -104,5 +104,3 @@ This test script is useful for:
 - **Prometheus Connection**: Check that Prometheus is accessible at the configured URL
 - **Missing Dependencies**: Install required packages with `pip3 install aiohttp` 
 
-<!-- python3 tests/test_metric_analysis.py --pattern "probe" -->
-<!-- python3 tests/test_metric_analysis.py --metric "probe_http_ssl" -->

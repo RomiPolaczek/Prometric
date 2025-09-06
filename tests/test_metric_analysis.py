@@ -361,7 +361,7 @@ async def main():
     parser = argparse.ArgumentParser(description='Analyze metric information in the database and Prometheus')
     parser.add_argument('--pattern', '-p', help='Metric name pattern to filter by (e.g., "cpu", "memory")')
     parser.add_argument('--metric', '-m', help='Specific metric name to analyze in detail')
-    parser.add_argument('--api-port', default='8001', help='API port (default: 8001)')
+    parser.add_argument('--api-port', default='8000', help='API port (default: 8000)')
     
     args = parser.parse_args()
     

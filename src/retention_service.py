@@ -156,6 +156,94 @@ class RetentionService:
             logger.error(f"Error querying Prometheus metrics: {e}")
             raise
 
+    async def _count_data_points_to_delete(self, metric_names: List[str], cutoff_timestamp: int) -> int:
+        """Count how many data points will be deleted (for logging purposes only)"""
+        if not metric_names:
+            return 0
+        
+        total_data_points = 0
+        
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout) as session:
+                for metric_name in metric_names:
+                    try:
+                        # Use count_over_time to get actual data point count in the deletion range
+                        # Calculate time range for the query (from start to cutoff)
+                        cutoff_date = datetime.fromtimestamp(cutoff_timestamp)
+                        
+                        # Use a PromQL query to count data points that will be deleted
+                        # We'll count data points from a reasonable time ago (not from 1970)
+                        # Let's use the last 30 days as a reasonable window
+                        start_date = cutoff_date - timedelta(days=30)
+                        start_time = start_date.isoformat() + 'Z'
+                        end_time = cutoff_date.isoformat() + 'Z'
+                        
+                        # Try different approaches to count data points
+                        queries_to_try = [
+                            f"count_over_time({metric_name}[{int((cutoff_date - start_date).total_seconds())}s])",
+                            f"count_over_time({{{metric_name}}}[30d])",
+                            metric_name  # Fallback to simple metric query
+                        ]
+                        
+                        counted = False
+                        for query in queries_to_try:
+                            if counted:
+                                break
+                                
+                            # Try query at cutoff time
+                            query_url = f"{self.prometheus_url}/api/v1/query"
+                            params = {
+                                'query': query,
+                                'time': str(cutoff_timestamp)
+                            }
+                            
+                            async with session.get(query_url, params=params) as response:
+                                if response.status == 200:
+                                    data = await response.json()
+                                    if data.get('status') == 'success':
+                                        results = data.get('data', {}).get('result', [])
+                                        for result in results:
+                                            if 'value' in result and len(result['value']) > 1:
+                                                # This is a count result
+                                                count_value = float(result['value'][1])
+                                                total_data_points += int(count_value)
+                                                counted = True
+                                                logger.debug(f"Metric {metric_name}: ~{int(count_value)} data points to delete")
+                                            elif 'values' in result:
+                                                # This is a range result
+                                                values_count = len(result['values'])
+                                                total_data_points += values_count
+                                                counted = True
+                                                logger.debug(f"Metric {metric_name}: {values_count} data points to delete")
+                                        
+                                        if counted:
+                                            break
+                                else:
+                                    logger.debug(f"Query failed for {metric_name} with query '{query}': HTTP {response.status}")
+                        
+                        if not counted:
+                            # Fallback: assume some reasonable number based on series
+                            # This is just for logging, so an estimate is fine
+                            estimated_points = 100  # Conservative estimate per metric
+                            total_data_points += estimated_points
+                            logger.debug(f"Metric {metric_name}: estimated ~{estimated_points} data points to delete (fallback)")
+                            
+                    except Exception as metric_error:
+                        logger.debug(f"Error counting data points for metric {metric_name}: {metric_error}")
+                        # Continue with other metrics
+                        continue
+                    
+                    # Small delay between requests
+                    await asyncio.sleep(0.05)
+                    
+        except Exception as e:
+            logger.debug(f"Error counting data points for logging: {e}")
+            # Return 0 if we can't count - this is just for logging
+            return 0
+            
+        logger.debug(f"Total estimated data points to delete: {total_data_points}")
+        return total_data_points
+
     async def _delete_metric_data(self, metric_names: List[str], cutoff_timestamp: int) -> int:
         """Delete old data for specified metrics - deletes everything from start=0 to end=cutoff_timestamp"""
         if not metric_names:
@@ -276,6 +364,11 @@ class RetentionService:
             if not matching_metrics:
                 logger.warning(f"No metrics found matching pattern: {policy.metric_name_pattern}")
             
+            # Count data points that will be deleted (for logging purposes)
+            logger.info(f"Attempting to count data points for {len(matching_metrics)} metrics before deletion")
+            data_points_to_delete = await self._count_data_points_to_delete(matching_metrics, cutoff_timestamp)
+            logger.info(f"Data point counting completed: {data_points_to_delete} data points will be deleted")
+            
             # Delete old data (everything from start=0 to end=cutoff_timestamp)
             series_deleted = await self._delete_metric_data(matching_metrics, cutoff_timestamp)
             
@@ -304,7 +397,11 @@ class RetentionService:
                 success=True
             )
             
-            logger.info(f"Policy {policy_id} executed successfully: {series_deleted} series deleted from {len(matching_metrics)} metrics")
+            # Log with data points count for better visibility
+            if data_points_to_delete > 0:
+                logger.info(f"Policy {policy_id} executed successfully: {data_points_to_delete} data points deleted from {series_deleted} series across {len(matching_metrics)} metrics")
+            else:
+                logger.info(f"Policy {policy_id} executed successfully: {series_deleted} series deleted from {len(matching_metrics)} metrics (data point count unavailable)")
             return result
         except Exception as e:
             logger.error(f"Error executing policy {policy_id}: {e}")

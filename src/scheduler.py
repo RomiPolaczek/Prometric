@@ -30,12 +30,14 @@ async def execute_retention_policies():
         # Log summary
         successful = sum(1 for r in results if r.success)
         failed = len(results) - successful
-        total_deleted = sum(r.series_deleted for r in results if r.success)
+        total_series_deleted = sum(r.series_deleted for r in results if r.success)
         
+        # The individual policy logs will show data points deleted
+        # Here we show the series count for backwards compatibility
         logger.info(
             f"Retention policy execution completed: "
             f"{successful} successful, {failed} failed, "
-            f"{total_deleted} total series deleted"
+            f"{total_series_deleted} total series deleted"
         )
         
     except Exception as e:
