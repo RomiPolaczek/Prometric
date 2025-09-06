@@ -161,6 +161,16 @@ export const systemApi = {
     return response.data
   },
 
+  testConnection: async (): Promise<any> => {
+    const response = await api.get('/debug/test-connection')
+    return response.data
+  },
+
+  testPrometheus: async (): Promise<any> => {
+    const response = await api.get('/debug/test-prometheus')
+    return response.data
+  },
+
   testPattern: async (pattern: string): Promise<any> => {
     const response = await api.post('/debug/test-pattern', { pattern })
     return response.data

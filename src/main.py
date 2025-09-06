@@ -292,24 +292,68 @@ async def get_metrics_sample():
         logger.error(f"Failed to get metrics sample: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/debug/test-connection")
+async def test_connection():
+    """Test if the API connection is working"""
+    try:
+        return {"status": "ok", "message": "API connection is working"}
+    except Exception as e:
+        logger.error(f"Connection test failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/debug/test-prometheus")
+async def test_prometheus():
+    """Test Prometheus connectivity"""
+    try:
+        prometheus_url = retention_service.prometheus_url
+        logger.info(f"Testing Prometheus connection to: {prometheus_url}")
+        
+        import aiohttp
+        async with aiohttp.ClientSession(timeout=retention_service.timeout) as session:
+            try:
+                async with session.get(f"{prometheus_url}/api/v1/query?query=up") as response:
+                    if response.status != 200:
+                        raise Exception(f"Prometheus not accessible: HTTP {response.status}")
+                    data = await response.json()
+                    if data.get('status') != 'success':
+                        raise Exception(f"Prometheus query failed: {data.get('error', 'Unknown error')}")
+                    
+                    return {
+                        "status": "ok", 
+                        "message": "Prometheus connection successful",
+                        "prometheus_url": prometheus_url,
+                        "query_result": data
+                    }
+            except aiohttp.ClientError as e:
+                raise Exception(f"Cannot connect to Prometheus at {prometheus_url}: {str(e)}")
+                
+    except Exception as e:
+        logger.error(f"Prometheus connection test failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/debug/test-pattern")
 async def test_pattern(request: Dict[str, str]):
     """Test a metric pattern against available metrics"""
     pattern = request.get("pattern", "")
+    logger.info(f"Testing pattern: '{pattern}'")
+    
     if not pattern:
         raise HTTPException(status_code=400, detail="Pattern is required")
     
     try:
         # Get the regex pattern that would be used
         regex_pattern = retention_service._convert_pattern_to_regex(pattern)
+        logger.info(f"Converted to regex: '{regex_pattern}'")
         
         # Get matching metrics
         matching_metrics = await retention_service._query_prometheus_metrics(pattern)
+        logger.info(f"Found {len(matching_metrics)} matching metrics")
         
         # Get sample of all metrics for comparison
         all_metrics = await retention_service.get_available_metrics_sample(200)
+        logger.info(f"Total available metrics sample: {len(all_metrics)}")
         
-        return {
+        result = {
             "input_pattern": pattern,
             "regex_pattern": regex_pattern,
             "matches_count": len(matching_metrics),
@@ -317,9 +361,13 @@ async def test_pattern(request: Dict[str, str]):
             "total_available_metrics": len(all_metrics),
             "sample_available_metrics": all_metrics[:10]  # First 10 available
         }
+        
+        logger.info(f"Test pattern result: {result}")
+        return result
+        
     except Exception as e:
-        logger.error(f"Failed to test pattern '{pattern}': {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to test pattern '{pattern}': {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to test pattern: {str(e)}")
 
 @app.post("/retention-policies/{policy_id}/dry-run")
 async def dry_run_policy(policy_id: int, db: Session = Depends(get_db)):

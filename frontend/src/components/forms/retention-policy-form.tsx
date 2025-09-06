@@ -105,14 +105,16 @@ export function RetentionPolicyForm({ policy, onSuccess }: RetentionPolicyFormPr
   const testPatternMutation = useMutation({
     mutationFn: systemApi.testPattern,
     onSuccess: (data) => {
+      console.log('Test pattern success:', data)
       setTestResults(data)
       toast.success('Pattern tested', {
         description: `Found ${data.matches_count} matching metrics`,
       })
     },
     onError: (error: any) => {
+      console.error('Test pattern error:', error)
       toast.error('Test failed', {
-        description: error.response?.data?.detail || error.message,
+        description: error.response?.data?.detail || error.message || 'Unknown error occurred',
       })
     },
   })
@@ -136,21 +138,23 @@ export function RetentionPolicyForm({ policy, onSuccess }: RetentionPolicyFormPr
 
   const handleTestPattern = () => {
     const pattern = form.getValues('metric_name_pattern')
-    if (!pattern) {
+    if (!pattern || pattern.trim() === '') {
       toast.error('Pattern required', {
         description: 'Please enter a metric pattern to test',
       })
       return
     }
-    testPatternMutation.mutate(pattern)
+    console.log('Testing pattern:', pattern)
+    testPatternMutation.mutate(pattern.trim())
   }
 
   const examplePatterns = [
-    { pattern: 'prometheus_*', description: 'All Prometheus metrics' },
-    { pattern: 'go_*', description: 'All Go runtime metrics' },
-    { pattern: 'http_*', description: 'All HTTP metrics' },
-    { pattern: '^cpu_usage.*', description: 'CPU usage metrics (regex)' },
-    { pattern: 'probe_success', description: 'Exact metric name' },
+    { pattern: 'up', description: 'Instance up/down status' },
+    { pattern: 'prometheus_*', description: 'All Prometheus internal metrics' },
+    { pattern: 'go_*', description: 'Go runtime metrics' },
+    { pattern: 'process_*', description: 'Process metrics (CPU, memory)' },
+    { pattern: 'scrape_*', description: 'Scraping metrics' },
+    { pattern: 'promhttp_*', description: 'Prometheus HTTP metrics' },
   ]
 
   return (
@@ -166,7 +170,7 @@ export function RetentionPolicyForm({ policy, onSuccess }: RetentionPolicyFormPr
               <FormControl>
                 <div className="space-y-2">
                   <Input 
-                    placeholder="e.g., cpu_usage_* or ^http_request.*"
+                    placeholder="e.g., up, prometheus_*, go_*, process_*"
                     {...field}
                   />
                   <div className="flex items-center gap-2">
@@ -184,6 +188,7 @@ export function RetentionPolicyForm({ policy, onSuccess }: RetentionPolicyFormPr
                       )}
                       Test Pattern
                     </Button>
+
                   </div>
                 </div>
               </FormControl>

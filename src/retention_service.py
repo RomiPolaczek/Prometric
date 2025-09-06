@@ -156,6 +156,28 @@ class RetentionService:
             logger.error(f"Error querying Prometheus metrics: {e}")
             raise
 
+    async def get_available_metrics_sample(self, limit: int = 100) -> List[str]:
+        """Get a sample of available metrics from Prometheus"""
+        try:
+            # Use label_values API to get all metric names
+            async with aiohttp.ClientSession(timeout=self.timeout) as session:
+                async with session.get(f"{self.prometheus_url}/api/v1/label/__name__/values") as response:
+                    if response.status != 200:
+                        raise Exception(f"Failed to query metrics: HTTP {response.status}")
+                    
+                    data = await response.json()
+                    if data.get('status') != 'success':
+                        raise Exception(f"Prometheus query failed: {data.get('error', 'Unknown error')}")
+                    
+                    all_metrics = data['data']
+                    
+                    # Return a sample of metrics (up to the limit)
+                    return all_metrics[:limit] if len(all_metrics) > limit else all_metrics
+                    
+        except Exception as e:
+            logger.error(f"Error getting available metrics sample: {e}")
+            raise
+
     async def _count_data_points_to_delete(self, metric_names: List[str], cutoff_timestamp: int) -> int:
         """Count how many data points will be deleted (for logging purposes only)"""
         if not metric_names:
