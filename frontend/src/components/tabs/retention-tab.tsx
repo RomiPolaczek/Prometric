@@ -50,9 +50,10 @@ import { format } from 'date-fns'
 export function RetentionTab() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingPolicy, setEditingPolicy] = useState<RetentionPolicy | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const queryClient = useQueryClient()
 
-  const { data: policies, isLoading } = useQuery({
+  const { data: policies, isLoading, error, refetch } = useQuery({
     queryKey: ['retention-policies'],
     queryFn: retentionPoliciesApi.getAll,
   })
@@ -156,11 +157,13 @@ export function RetentionTab() {
                 Create New Policy
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
               <DialogHeader>
                 <DialogTitle>Create New Retention Policy</DialogTitle>
               </DialogHeader>
-              <RetentionPolicyForm onSuccess={handleCreateSuccess} />
+              <div className="flex-1 overflow-y-auto pr-2">
+                <RetentionPolicyForm onSuccess={handleCreateSuccess} />
+              </div>
             </DialogContent>
           </Dialog>
 
@@ -179,9 +182,26 @@ export function RetentionTab() {
 
           <Button 
             variant="outline"
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['retention-policies'] })}
+            onClick={async () => {
+              setIsRefreshing(true)
+              try {
+                await refetch()
+                toast.success('Retention policies refreshed successfully')
+              } catch (error: any) {
+                toast.error('Failed to refresh policies', {
+                  description: error.message || 'Unknown error occurred'
+                })
+              } finally {
+                setIsRefreshing(false)
+              }
+            }}
+            disabled={isRefreshing}
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
+            {isRefreshing ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
             Refresh
           </Button>
         </div>
@@ -247,49 +267,57 @@ export function RetentionTab() {
                         )}
                       </TableCell>
                       <TableCell className="flex gap-0.75">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="ghost" size="icon" onClick={() => executePolicyMutation.mutate(policy.id)}>
-                                <Play className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Execute</TooltipContent>
-                          </Tooltip>
+                        <div className="relative group">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => executePolicyMutation.mutate(policy.id)}
+                          >
+                            <Play className="h-4 w-4" />
+                          </Button>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+                            Execute
+                          </div>
+                        </div>
 
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="ghost" size="icon" onClick={() => dryRunMutation.mutate(policy.id)}>
-                                <TestTube className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Dry Run</TooltipContent>
-                          </Tooltip>
+                        <div className="relative group">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => dryRunMutation.mutate(policy.id)}
+                          >
+                            <TestTube className="h-4 w-4" />
+                          </Button>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+                            Dry Run
+                          </div>
+                        </div>
 
-                        {/* Edit */}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="ghost" size="icon" onClick={() => setEditingPolicy(policy)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-black text-white z-[9999]">Edit</TooltipContent>
-                          </Tooltip>
+                        <div className="relative group">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => setEditingPolicy(policy)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+                            Edit
+                          </div>
+                        </div>
 
-                        {/* Delete */}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => deletePolicyMutation.mutate(policy.id)}
-                              >
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Delete</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <div className="relative group">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deletePolicyMutation.mutate(policy.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                          </Button>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap">
+                            Delete
+                          </div>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -314,16 +342,18 @@ export function RetentionTab() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingPolicy} onOpenChange={(open) => !open && setEditingPolicy(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Edit Retention Policy</DialogTitle>
           </DialogHeader>
-          {editingPolicy && (
-            <RetentionPolicyForm 
-              policy={editingPolicy}
-              onSuccess={handleEditSuccess}
-            />
-          )}
+          <div className="flex-1 overflow-y-auto pr-2">
+            {editingPolicy && (
+              <RetentionPolicyForm 
+                policy={editingPolicy}
+                onSuccess={handleEditSuccess}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

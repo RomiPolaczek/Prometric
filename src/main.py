@@ -292,24 +292,68 @@ async def get_metrics_sample():
         logger.error(f"Failed to get metrics sample: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/debug/test-connection")
+async def test_connection():
+    """Test if the API connection is working"""
+    try:
+        return {"status": "ok", "message": "API connection is working"}
+    except Exception as e:
+        logger.error(f"Connection test failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/debug/test-prometheus")
+async def test_prometheus():
+    """Test Prometheus connectivity"""
+    try:
+        prometheus_url = retention_service.prometheus_url
+        logger.info(f"Testing Prometheus connection to: {prometheus_url}")
+        
+        import aiohttp
+        async with aiohttp.ClientSession(timeout=retention_service.timeout) as session:
+            try:
+                async with session.get(f"{prometheus_url}/api/v1/query?query=up") as response:
+                    if response.status != 200:
+                        raise Exception(f"Prometheus not accessible: HTTP {response.status}")
+                    data = await response.json()
+                    if data.get('status') != 'success':
+                        raise Exception(f"Prometheus query failed: {data.get('error', 'Unknown error')}")
+                    
+                    return {
+                        "status": "ok", 
+                        "message": "Prometheus connection successful",
+                        "prometheus_url": prometheus_url,
+                        "query_result": data
+                    }
+            except aiohttp.ClientError as e:
+                raise Exception(f"Cannot connect to Prometheus at {prometheus_url}: {str(e)}")
+                
+    except Exception as e:
+        logger.error(f"Prometheus connection test failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/debug/test-pattern")
 async def test_pattern(request: Dict[str, str]):
     """Test a metric pattern against available metrics"""
     pattern = request.get("pattern", "")
+    logger.info(f"Testing pattern: '{pattern}'")
+    
     if not pattern:
         raise HTTPException(status_code=400, detail="Pattern is required")
     
     try:
         # Get the regex pattern that would be used
         regex_pattern = retention_service._convert_pattern_to_regex(pattern)
+        logger.info(f"Converted to regex: '{regex_pattern}'")
         
         # Get matching metrics
         matching_metrics = await retention_service._query_prometheus_metrics(pattern)
+        logger.info(f"Found {len(matching_metrics)} matching metrics")
         
         # Get sample of all metrics for comparison
         all_metrics = await retention_service.get_available_metrics_sample(200)
+        logger.info(f"Total available metrics sample: {len(all_metrics)}")
         
-        return {
+        result = {
             "input_pattern": pattern,
             "regex_pattern": regex_pattern,
             "matches_count": len(matching_metrics),
@@ -317,9 +361,13 @@ async def test_pattern(request: Dict[str, str]):
             "total_available_metrics": len(all_metrics),
             "sample_available_metrics": all_metrics[:10]  # First 10 available
         }
+        
+        logger.info(f"Test pattern result: {result}")
+        return result
+        
     except Exception as e:
-        logger.error(f"Failed to test pattern '{pattern}': {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to test pattern '{pattern}': {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to test pattern: {str(e)}")
 
 @app.post("/retention-policies/{policy_id}/dry-run")
 async def dry_run_policy(policy_id: int, db: Session = Depends(get_db)):
@@ -681,6 +729,80 @@ async def get_prometheus_series(
     except Exception as e:
         logger.error(f"Series error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/prometheus-proxy/metric-count/{metric_name}")
+async def get_metric_count(metric_name: str, hours: int = 24):
+    """Get the count of data points for a specific metric over a time range"""
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            # Get series count for the metric
+            series_response = await client.get(
+                f"{prometheus_url}/api/v1/series",
+                params={'match[]': metric_name}
+            )
+            
+            series_count = 0
+            if series_response.status_code == 200:
+                series_data = series_response.json()
+                series_count = len(series_data.get('data', []))
+            
+            # Get data points count using count_over_time
+            count_query = f"count_over_time({metric_name}[{hours}h])"
+            count_response = await client.get(
+                f"{prometheus_url}/api/v1/query",
+                params={'query': count_query}
+            )
+            
+            total_data_points = 0
+            data_points_per_series = []
+            
+            if count_response.status_code == 200:
+                count_data = count_response.json()
+                results = count_data.get('data', {}).get('result', [])
+                
+                for result in results:
+                    if result.get('value'):
+                        points = int(float(result['value'][1]))
+                        total_data_points += points
+                        data_points_per_series.append({
+                            'metric': result.get('metric', {}),
+                            'data_points': points
+                        })
+            
+            # Get current values count
+            current_query = f"count by (__name__)({{{metric_name}}})"
+            current_response = await client.get(
+                f"{prometheus_url}/api/v1/query",
+                params={'query': current_query}
+            )
+            
+            current_series_count = 0
+            if current_response.status_code == 200:
+                current_data = current_response.json()
+                results = current_data.get('data', {}).get('result', [])
+                if results:
+                    current_series_count = int(float(results[0]['value'][1]))
+            
+            return {
+                "metric_name": metric_name,
+                "time_range_hours": hours,
+                "series_count": series_count,
+                "current_series_count": current_series_count,
+                "total_data_points": total_data_points,
+                "data_points_per_series": data_points_per_series,
+                "average_points_per_series": total_data_points / series_count if series_count > 0 else 0,
+                "status": "success"
+            }
+            
+    except Exception as e:
+        logger.error(f"Failed to get metric count for {metric_name}: {e}")
+        return {
+            "metric_name": metric_name,
+            "error": str(e),
+            "status": "error"
+        }
 
 # AI Chatbot Endpoints
 @app.post("/ai/translate")

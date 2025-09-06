@@ -116,6 +116,26 @@ export const prometheusApi = {
   getTSDBStats: async (): Promise<PrometheusResponse<TSDBStats>> => {
     const response = await api.get('/prometheus-proxy/status/tsdb')
     return response.data
+  },
+
+  getMetricCount: async (metricName: string, hours: number = 24): Promise<{
+    metric_name: string
+    time_range_hours: number
+    series_count: number
+    current_series_count: number
+    total_data_points: number
+    data_points_per_series: Array<{
+      metric: Record<string, string>
+      data_points: number
+    }>
+    average_points_per_series: number
+    status: string
+    error?: string
+  }> => {
+    const response = await api.get(`/prometheus-proxy/metric-count/${metricName}`, {
+      params: { hours }
+    })
+    return response.data
   }
 }
 
@@ -138,6 +158,16 @@ export const systemApi = {
 
   getMetricsSample: async (): Promise<any> => {
     const response = await api.get('/debug/metrics-sample')
+    return response.data
+  },
+
+  testConnection: async (): Promise<any> => {
+    const response = await api.get('/debug/test-connection')
+    return response.data
+  },
+
+  testPrometheus: async (): Promise<any> => {
+    const response = await api.get('/debug/test-prometheus')
     return response.data
   },
 
