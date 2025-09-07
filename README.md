@@ -2,12 +2,15 @@
 
 A modern web-based management interface for Prometheus that extends its capabilities with metric-specific retention policies and AI-powered query generation.
 
+
 ## Overview
 
 Prometric addresses key limitations in Prometheus monitoring by providing:
 - **Granular Retention Control**: Set different retention periods per metric instead of global retention
 - **Natural Language Queries**: Convert plain English questions into PromQL using AI
 - **Unified Management Interface**: Complete web dashboard for all Prometheus operations
+
+
 
 ## Features
 
@@ -36,6 +39,8 @@ Prometric addresses key limitations in Prometheus monitoring by providing:
 - **Execution Logging**: Track policy execution history and results
 - **Real-time Monitoring**: Monitor retention policy effectiveness
 
+
+
 ## Architecture
 
 ```
@@ -59,6 +64,8 @@ Prometric addresses key limitations in Prometheus monitoring by providing:
                        │ • Execution Logs │
                        └──────────────────┘
 ```
+
+
 
 ## Installation
 
@@ -105,9 +112,13 @@ Prometric addresses key limitations in Prometheus monitoring by providing:
    - Web interface: `http://localhost:3000`
    - API documentation: `http://localhost:8000/docs`
 
+
+
 ## AI Assistant Setup
 
 For detailed instructions on configuring and using the AI-powered features, please see [AI_SETUP.md](./AI_SETUP.md).
+
+
 
 ## Usage Guide
 
@@ -161,6 +172,8 @@ The AI will:
 - Prometheus configuration
 - TSDB statistics
 - Runtime information
+
+
 
 ## Retention Management
 
@@ -226,6 +239,8 @@ Make sure you have Docker and Docker Compose installed.
 
 ```bash
 docker-compose up -d
+```
+
 
 
 ## Configuration
@@ -276,6 +291,7 @@ export DATABASE_URL="sqlite:///./data/prometheus_retention.db"
 - Error handling and recovery
 
 
+
 ## Testing
 
 ### Running Tests
@@ -290,6 +306,7 @@ cd frontend
 npm test
 ```
 For more details about the available test utilities and usage, see the tests/README.md
+
 
 
 ## API Reference
@@ -322,6 +339,8 @@ For more details about the available test utilities and usage, see the tests/REA
 - `GET /config` - Current configuration
 
 Full API documentation available at `/docs` when running the backend.
+
+
 
 ## Troubleshooting
 
@@ -381,6 +400,8 @@ Full API documentation available at `/docs` when running the backend.
 - **Network**: Configure appropriate firewall rules
 - **Authentication**: Consider adding authentication for production use
 
+
+
 ## Contributing
 
 1. Fork the repository
@@ -397,9 +418,13 @@ Full API documentation available at `/docs` when running the backend.
 4. Add tests for new features
 5. Update documentation as needed
 
+
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+
 
 ## Acknowledgments
 
