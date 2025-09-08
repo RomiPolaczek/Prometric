@@ -461,19 +461,26 @@ export function GraphTab() {
                       if (validSeries.length === 0) return null
                       
                       return (
-                        <div className="bg-background border border-border rounded-lg shadow-lg p-3 max-w-md">
-                          <p className="font-medium text-sm mb-2">
+                        <div className="bg-background border border-border rounded-lg shadow-lg p-3 w-auto">
+                          <p className="font-medium text-sm mb-2 whitespace-nowrap">
                             {format(new Date(label), 'yyyy-MM-dd HH:mm:ss')}
                           </p>
                           <div className="space-y-1 max-h-32 overflow-y-auto">
                             {validSeries.map((entry, index) => (
-                              <div key={index} className="flex items-center gap-2 text-sm">
+                              <div key={index} className="flex items-start gap-2 text-sm whitespace-nowrap">
                                 <div 
-                                  className="w-3 h-3 rounded flex-shrink-0"
+                                  className="w-3 h-3 rounded flex-shrink-0 mt-0.5"
                                   style={{ backgroundColor: entry.color }}
                                 />
-                                <span className="font-mono text-xs truncate">
-                                  {entry.name}: {typeof entry.value === 'number' ? entry.value.toFixed(6) : entry.value}
+                                <span className="font-mono text-xs">
+                                  {(() => {
+                                    const fullName = String(entry.name || '')
+                                    // Remove the metric name (everything before the first '{' or the whole string if no '{')
+                                    const labelsOnly = fullName.includes('{') 
+                                      ? fullName.substring(fullName.indexOf('{'))
+                                      : fullName.split('_').slice(-2).join('_') // fallback: show last 2 parts
+                                    return `${labelsOnly}: ${typeof entry.value === 'number' ? entry.value.toFixed(1) : entry.value}`
+                                  })()}
                                 </span>
                               </div>
                             ))}
