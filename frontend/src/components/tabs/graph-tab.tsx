@@ -48,8 +48,8 @@ export function GraphTab() {
   const [seriesNames, setSeriesNames] = useState<string[]>([])
 
   const queryMutation = useMutation({
-    mutationFn: ({ query, start, end }: { query: string; start: string; end: string }) =>
-      prometheusApi.queryRange(query, start, end),
+    mutationFn: ({ query, start, end, step }: { query: string; start: string; end: string; step: string }) =>
+      prometheusApi.queryRange(query, start, end, step),
     onSuccess: (data) => {
       if (data.data.result.length === 0) {
         setGraphData([])
@@ -68,9 +68,22 @@ export function GraphTab() {
       toast.success(`Graph updated: Loaded ${data.data.result.length} series`)
     },
     onError: (error: any) => {
-      toast.error('Query failed', {
-        description: error.response?.data?.error || error.message,
-      })
+      const errorMessage = error.response?.data?.error || error.message
+      const isTimeout = error.code === 'ECONNABORTED' || errorMessage.includes('timeout') || errorMessage.includes('504')
+      
+      if (isTimeout) {
+        toast.error('Query timed out', {
+          description: 'Try reducing the time range or the query will use a larger step size automatically',
+        })
+      } else if (errorMessage.includes('too many data points') || errorMessage.includes('query processing')) {
+        toast.error('Query too large', {
+          description: 'Try reducing the time range or using a more specific query',
+        })
+      } else {
+        toast.error('Query failed', {
+          description: errorMessage,
+        })
+      }
     },
   })
 
@@ -142,6 +155,28 @@ export function GraphTab() {
     return { start: start.toString(), end: nowTs.toString() }
   }
 
+  const getOptimalStep = () => {
+    const { start, end } = getTimeRange()
+    const duration = parseInt(end) - parseInt(start)
+    
+    // Calculate optimal step to get around 1000-1500 data points
+    // This provides good resolution while avoiding performance issues
+    const targetDataPoints = 1200
+    const optimalStep = Math.max(15, Math.floor(duration / targetDataPoints))
+    
+    // Round to sensible intervals
+    if (optimalStep <= 15) return '15s'
+    if (optimalStep <= 30) return '30s'
+    if (optimalStep <= 60) return '1m'
+    if (optimalStep <= 300) return '5m'
+    if (optimalStep <= 900) return '15m'
+    if (optimalStep <= 1800) return '30m'
+    if (optimalStep <= 3600) return '1h'
+    if (optimalStep <= 14400) return '4h'
+    if (optimalStep <= 86400) return '1d'
+    return '1d'
+  }
+
   const handleExecute = () => {
     if (!query.trim()) {
       toast.error('Query required', {
@@ -151,7 +186,17 @@ export function GraphTab() {
     }
 
     const { start, end } = getTimeRange()
-    queryMutation.mutate({ query: query.trim(), start, end })
+    const step = getOptimalStep()
+    
+    // Show info about the step being used for large time ranges
+    const duration = parseInt(end) - parseInt(start)
+    if (duration > 86400) { // More than 1 day
+      toast.info(`Using ${step} step for ${Math.floor(duration / 86400)}d range`, {
+        description: 'Larger step sizes are used for longer time ranges to optimize performance',
+      })
+    }
+    
+    queryMutation.mutate({ query: query.trim(), start, end, step })
   }
 
   const handleClear = () => {
@@ -194,7 +239,8 @@ export function GraphTab() {
 
     const interval = setInterval(() => {
       const { start, end } = getTimeRange()
-      queryMutation.mutate({ query: query.trim(), start, end })
+      const step = getOptimalStep()
+      queryMutation.mutate({ query: query.trim(), start, end, step })
     }, parseInt(refreshInterval) * 1000)
 
     return () => clearInterval(interval)
@@ -229,7 +275,27 @@ export function GraphTab() {
 
   return (
     <div className="space-y-6">
-      {/* Query Controls */}
+      {/* Info Alert for Dynamic Step Sizing */}
+      {(() => {
+        const { start, end } = getTimeRange()
+        const duration = parseInt(end) - parseInt(start)
+        const step = getOptimalStep()
+        
+        if (duration > 86400 && step !== '15s') { // More than 1 day and not default step
+          return (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                For large time ranges, the system automatically uses larger step sizes ({step}) to optimize performance and prevent timeouts. 
+                This provides a good balance between data resolution and query speed.
+              </AlertDescription>
+            </Alert>
+          )
+        }
+        return null
+      })()}
+
+      {/* Query Input */}
       <Card>
         <CardHeader>
           <CardTitle>Graph Query</CardTitle>
@@ -367,9 +433,11 @@ export function GraphTab() {
         </CardHeader>
         <CardContent>
           {graphData.length > 0 ? (
-            <div className="h-96">
+            <div className="h-96 relative">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={graphData}>
+                <LineChart 
+                  data={graphData}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="timestamp"
@@ -380,10 +448,42 @@ export function GraphTab() {
                   />
                   <YAxis />
                   <Tooltip 
-                    labelFormatter={(value) => format(new Date(value), 'yyyy-MM-dd HH:mm:ss')}
-                    formatter={formatTooltipValue}
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload || !payload.length) return null
+                      
+                      // Show all series that have positive values
+                      const validSeries = payload.filter(entry => {
+                        const value = Number(entry.value)
+                        return value > 0 && !isNaN(value)
+                      })
+                      
+                      // Only show tooltip if there are valid series
+                      if (validSeries.length === 0) return null
+                      
+                      return (
+                        <div className="bg-background border border-border rounded-lg shadow-lg p-3 max-w-md">
+                          <p className="font-medium text-sm mb-2">
+                            {format(new Date(label), 'yyyy-MM-dd HH:mm:ss')}
+                          </p>
+                          <div className="space-y-1 max-h-32 overflow-y-auto">
+                            {validSeries.map((entry, index) => (
+                              <div key={index} className="flex items-center gap-2 text-sm">
+                                <div 
+                                  className="w-3 h-3 rounded flex-shrink-0"
+                                  style={{ backgroundColor: entry.color }}
+                                />
+                                <span className="font-mono text-xs truncate">
+                                  {entry.name}: {typeof entry.value === 'number' ? entry.value.toFixed(6) : entry.value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    }}
+                    cursor={false}
+                    isAnimationActive={false}
                   />
-                  <Legend />
                   {seriesNames.map((series, index) => (
                     <Line
                       key={series}
@@ -392,6 +492,12 @@ export function GraphTab() {
                       stroke={getRandomColor(index)}
                       strokeWidth={2}
                       dot={false}
+                      activeDot={{ 
+                        r: 4, 
+                        strokeWidth: 2, 
+                        stroke: '#fff',
+                        fill: getRandomColor(index)
+                      }}
                       connectNulls={false}
                       name={series.length > 50 ? `${series.substring(0, 47)}...` : series}
                     />
@@ -417,17 +523,17 @@ export function GraphTab() {
       {seriesNames.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Series Information</CardTitle>
+            <CardTitle>Series Information ({seriesNames.length} series)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
               {seriesNames.map((series, index) => (
                 <div key={series} className="flex items-center gap-2">
                   <div 
-                    className="w-4 h-4 rounded"
+                    className="w-4 h-4 rounded flex-shrink-0"
                     style={{ backgroundColor: getRandomColor(index) }}
                   />
-                  <span className="font-mono text-sm">{series}</span>
+                  <span className="font-mono text-sm break-all">{series}</span>
                 </div>
               ))}
             </div>

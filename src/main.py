@@ -575,17 +575,40 @@ async def prometheus_query_range_direct(request: Dict[str, Any]):
     query = request.get("query", "").strip()
     start = request.get("start")
     end = request.get("end")
-    step = request.get("step", "15")
+    step = request.get("step", "15s")  # Default to 15s with unit
     
     if not query:
         raise HTTPException(status_code=400, detail="Query is required")
     if start is None or end is None:
         raise HTTPException(status_code=400, detail="Start and end timestamps are required")
     
+    # Validate time range to prevent excessive data points
+    try:
+        start_ts = int(start)
+        end_ts = int(end)
+        duration = end_ts - start_ts
+        
+        # Warn about very large time ranges
+        if duration > 30 * 24 * 3600:  # More than 30 days
+            logger.warning(f"Large time range requested: {duration}s ({duration/(24*3600):.1f} days)")
+            
+        # Extract step value for validation
+        step_seconds = _parse_step_to_seconds(step)
+        estimated_points = duration // step_seconds
+        
+        if estimated_points > 10000:  # More than 10k data points
+            logger.warning(f"Query may return many data points: ~{estimated_points}")
+            
+    except (ValueError, TypeError) as e:
+        logger.warning(f"Could not validate time range: {e}")
+    
     prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
     
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        # Increase timeout for potentially large queries
+        timeout = 60.0 if duration > 7 * 24 * 3600 else 30.0  # 60s for queries > 1 week
+        
+        async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.get(
                 f"{prometheus_url}/api/v1/query_range",
                 params={
@@ -597,34 +620,97 @@ async def prometheus_query_range_direct(request: Dict[str, Any]):
             )
             
             if response.status_code != 200:
-                raise HTTPException(status_code=response.status_code, detail=response.text)
+                error_detail = response.text
+                logger.error(f"Prometheus query failed: {error_detail}")
+                raise HTTPException(status_code=response.status_code, detail=error_detail)
             
             json_data = response.json()
+            
+            # Log result size for monitoring
+            if json_data.get("data", {}).get("result"):
+                result_count = len(json_data["data"]["result"])
+                logger.info(f"Query returned {result_count} series")
+                
             return json_data
             
     except httpx.TimeoutException:
-        raise HTTPException(status_code=504, detail="Query timed out")
+        logger.error(f"Query timed out after {timeout}s: {query[:100]}...")
+        raise HTTPException(status_code=504, detail="Query timed out - try reducing time range or using a larger step size")
     except httpx.RequestError as e:
+        logger.error(f"Request error: {e}")
         raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
     except Exception as e:
         logger.error(f"Query range error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+def _parse_step_to_seconds(step: str) -> int:
+    """Parse step string to seconds for validation purposes"""
+    if not step:
+        return 15
+        
+    step = step.strip().lower()
+    
+    # Handle numeric-only steps (assume seconds)
+    if step.isdigit():
+        return int(step)
+    
+    # Parse step with time units
+    import re
+    match = re.match(r'^(\d+)([smhd]?)$', step)
+    if not match:
+        return 15  # Default fallback
+    
+    value, unit = match.groups()
+    value = int(value)
+    
+    unit_multipliers = {
+        's': 1,
+        'm': 60,
+        'h': 3600,
+        'd': 86400,
+        '': 1  # Default to seconds if no unit
+    }
+    
+    return value * unit_multipliers.get(unit, 1)
 
 @app.get("/prometheus-proxy/query-range")
 async def prometheus_query_range_get(
     query: str,
     start: str,
     end: str,
-    step: str = "15"
+    step: str = "15s"  # Default to 15s with unit
 ):
     """Execute a PromQL range query for graphing - GET endpoint"""
     if not query:
         raise HTTPException(status_code=400, detail="Query is required")
     
+    # Validate time range to prevent excessive data points
+    try:
+        start_ts = int(start)
+        end_ts = int(end)
+        duration = end_ts - start_ts
+        
+        # Warn about very large time ranges
+        if duration > 30 * 24 * 3600:  # More than 30 days
+            logger.warning(f"Large time range requested: {duration}s ({duration/(24*3600):.1f} days)")
+            
+        # Extract step value for validation
+        step_seconds = _parse_step_to_seconds(step)
+        estimated_points = duration // step_seconds
+        
+        if estimated_points > 10000:  # More than 10k data points
+            logger.warning(f"Query may return many data points: ~{estimated_points}")
+            
+    except (ValueError, TypeError) as e:
+        logger.warning(f"Could not validate time range: {e}")
+    
     prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
     
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        # Increase timeout for potentially large queries
+        timeout = 60.0 if duration > 7 * 24 * 3600 else 30.0  # 60s for queries > 1 week
+        
+        async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.get(
                 f"{prometheus_url}/api/v1/query_range",
                 params={
@@ -636,14 +722,24 @@ async def prometheus_query_range_get(
             )
             
             if response.status_code != 200:
-                raise HTTPException(status_code=response.status_code, detail=response.text)
+                error_detail = response.text
+                logger.error(f"Prometheus query failed: {error_detail}")
+                raise HTTPException(status_code=response.status_code, detail=error_detail)
             
             json_data = response.json()
+            
+            # Log result size for monitoring
+            if json_data.get("data", {}).get("result"):
+                result_count = len(json_data["data"]["result"])
+                logger.info(f"Query returned {result_count} series")
+                
             return json_data
             
     except httpx.TimeoutException:
-        raise HTTPException(status_code=504, detail="Query timed out")
+        logger.error(f"Query timed out after {timeout}s: {query[:100]}...")
+        raise HTTPException(status_code=504, detail="Query timed out - try reducing time range or using a larger step size")
     except httpx.RequestError as e:
+        logger.error(f"Request error: {e}")
         raise HTTPException(status_code=503, detail=f"Failed to connect to Prometheus: {str(e)}")
     except Exception as e:
         logger.error(f"Query range error: {e}")

@@ -16,7 +16,7 @@ import {
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001',
-  timeout: 30000,
+  timeout: 60000, // Increased from 30s to 60s for large queries
 })
 
 // Retention Policies API
